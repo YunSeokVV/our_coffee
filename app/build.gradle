@@ -1,0 +1,58 @@
+plugins {
+    id 'com.android.application'
+    id 'com.google.gms.google-services'
+}
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        applicationId "com.example.our_coffee"
+        minSdkVersion 28
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+
+    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'com.google.android.material:material:1.4.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
+    implementation 'com.google.firebase:firebase-firestore:23.0.2'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    testImplementation 'junit:junit:4.+'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+
+    implementation platform('com.google.firebase:firebase-bom:28.4.0')
+    implementation 'com.google.firebase:firebase-analytics'
+
+    //Declare the dependency for the Firebase Authentication library
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
+
+    //glide 라이브러리는 url로 이미지를 편하게 갖고 올 수 있게 해주는 라이브러리다.
+    implementation 'com.github.bumptech.glide:glide:4.9.0'
+
+    //이미지뷰를 둥글게 표현해주는 라이브러리
+    implementation 'de.hdodenhof:circleimageview:3.1.0'
+
+    //FireBase Storgae (이미지 저장)를 사용하기위한 라이브러리
+    implementation 'com.google.firebase:firebase-storage'
+}

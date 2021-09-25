@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "1086575009901",
+    "project_id": "matchingapp-tinder",
+    "storage_bucket": "matchingapp-tinder.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1086575009901:android:9cd7ea06fc2dc3b57c1f64",
+        "android_client_info": {
+          "package_name": "com.example.our_coffee"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1086575009901-5l5k6e07k15a14ofm6bifs29708li40c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdaHsj-fccGJq2XHNuRxo2TaApCte4-Oo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1086575009901-5l5k6e07k15a14ofm6bifs29708li40c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1086575009901:android:fe29d65abf15a3567c1f64",
+        "android_client_info": {
+          "package_name": "com.sunnwy.firedate"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1086575009901-5l5k6e07k15a14ofm6bifs29708li40c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdaHsj-fccGJq2XHNuRxo2TaApCte4-Oo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1086575009901-5l5k6e07k15a14ofm6bifs29708li40c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

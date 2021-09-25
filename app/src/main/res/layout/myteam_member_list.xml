@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:id="@+id/linear"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/team_member_name"
+        app:layout_constraintStart_toEndOf="@+id/space5"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintHorizontal_weight="15"
+        app:layout_constraintDimensionRatio="5:4"
+        >
+
+        <ImageView
+            android:id="@+id/team_profile"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/myrect"
+            android:scaleType="fitXY"
+
+            />
+
+    </LinearLayout>
+
+
+
+
+
+    <Space
+        android:id="@+id/space5"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/linear"
+        app:layout_constraintHorizontal_weight="3"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/team_member_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="10sp"
+        android:gravity="left"
+        android:padding="5dp"
+        android:text="김좀비"
+        android:textColor="#CA43B4"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@+id/linear"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintHorizontal_weight="20"
+
+        />
+
+    <TextView
+        android:id="@+id/coffee_menu"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="10sp"
+        android:gravity="left"
+        android:padding="5dp"
+        android:text="저는 아이스 아메리카노가 좋아요!!"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_weight="20"
+        app:layout_constraintStart_toEndOf="@+id/linear"
+        app:layout_constraintTop_toBottomOf="@+id/team_member_name" />
+
+    <TextView
+        android:id="@+id/coffee_detail_option"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="10sp"
+        android:gravity="left"
+        android:padding="5dp"
+        android:text="휘핑크림 1개 추가"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="parent"
+
+        app:layout_constraintHorizontal_weight="20"
+        app:layout_constraintStart_toEndOf="@+id/linear"
+        app:layout_constraintTop_toBottomOf="@+id/coffee_menu" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
