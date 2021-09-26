@@ -29,6 +29,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
@@ -37,6 +39,9 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 public class Add_new_member extends AppCompatActivity {
+
+    FirebaseAuth mAuth;
+    FirebaseUser currentUser;
 
     //사용자가 초대하고 싶은 멤버의 이메일을 입력하는 창이다.
     EditText member_name;
@@ -90,8 +95,9 @@ public class Add_new_member extends AppCompatActivity {
         Intent intent = getIntent(); /*데이터 수신*/
         team_pid= intent.getExtras().getString("invite_team_pid"); /*String형*/
 
-        System.out.println("team_pid 확인");
-        System.out.println(team_pid);
+        //현재 로그인한 사용자의 이메일을 확인
+        mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
 
 
 
@@ -99,7 +105,7 @@ public class Add_new_member extends AppCompatActivity {
         //팀원 초대하기 버튼이다. 초대하고 싶은 사용자의 필드값에 팀의 pid 값을 저장 시킨다.
         invite_member.setOnClickListener(new View.OnClickListener() { @Override public void onClick(View view) {
             DocumentReference docRef = db.collection("users3").document(member_email);
-            docRef.update("invited_team", FieldValue.arrayUnion(team_pid));
+            docRef.update("invited_team", FieldValue.arrayUnion(team_pid+"_"+currentUser.getEmail()));
 
             Toast myToast = Toast.makeText(getApplicationContext(),"해당 사용자에게 초대 수락 메세지를 보냈습니다 :)", Toast.LENGTH_SHORT);
             myToast.show();
@@ -154,10 +160,6 @@ public class Add_new_member extends AppCompatActivity {
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
-
-
-
-
 
                         //검색 결과 사용자가 존재하는 경우
                         if (document.exists()) {
