@@ -35,11 +35,31 @@ public class NotificationFragment extends Fragment {
     private ArrayList<Myteam> myteamArrayList;
     private MyTeamAdapter myTeamAdapter;
 
+    // 초대해준 팀의 pid 값을 담는 list 다.
+    ArrayList<String> inviteteam_pid_list = new ArrayList<String>();
+
+
+    // 초대해준 사람의 이메일을 담는 변수다.
+    ArrayList<String> inviter_list = new ArrayList<String>();
+
+    // 초대해준 사람의 닉네임을 담는 변수다.
+    ArrayList<String> inviter_nickname_list = new ArrayList<String>();
+
     @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
 
+        Bundle bundle=getArguments();
+        inviteteam_pid_list=bundle.getStringArrayList("team_pid");
+//        inviter_list=bundle.getStringArrayList("Email");
+//        inviter_nickname_list=bundle.getStringArrayList("nick_name");
+
+        System.out.println("아오");
+        System.out.println(inviteteam_pid_list.size());
+        for(int i=0;i<inviteteam_pid_list.size();i++){
+            System.out.println(inviteteam_pid_list.get(i));
+        }
 
 
         return inflater.inflate(R.layout.fragmnet_notification, container, false);
@@ -47,6 +67,8 @@ public class NotificationFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
+
+
 
         //사용자가 팀을 추가하기위해 누르는 버튼
         RecyclerView my_team=(RecyclerView)view.findViewById(R.id.my_notification);
@@ -63,6 +85,8 @@ public class NotificationFragment extends Fragment {
         RecyclerDecoration_Height decoration_height = new RecyclerDecoration_Height(60);
         my_team.addItemDecoration(decoration_height);
 
+
+
         myTeamAdapter.setOnItemClickListener(new MyTeamAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(MyTeamAdapter.CustomViewHolder_MyTeam holder, View view, int position) {
@@ -71,6 +95,10 @@ public class NotificationFragment extends Fragment {
 
             }
         });
+
+
+
+
     }       //onViewCreated end
 
     @Override

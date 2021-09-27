@@ -13,7 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 
-import com.example.our_coffee.Utils.Myteam;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -36,10 +36,15 @@ import java.util.List;
 import java.util.Map;
 
 
+
 public class MainActivity extends AppCompatActivity {
 
     FirebaseAuth mAuth;
     FirebaseUser currentUser;
+
+    String test="It's test";
+    int test2=4;
+    String test3="don't worry";
 
     //FireBase 에 이미지를 저장하기위해 선언한 인스턴스
     FirebaseStorage storage = FirebaseStorage.getInstance();
@@ -58,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
     // 초대해준 팀의 pid 값을 담는 list 다.
     ArrayList<String> inviteteam_pid_list = new ArrayList<String>();
+    ArrayList<String> inviteteam_pid_list2 = new ArrayList<String>();
 
     // 초대해준 사람의 이메일을 담는 변수다.
     ArrayList<String> inviter_list = new ArrayList<String>();
@@ -66,6 +72,11 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> inviter_nickname_list = new ArrayList<String>();
 
     String TAG="MainActivity";
+
+
+    Bundle bundle=new Bundle();
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,10 +105,19 @@ public class MainActivity extends AppCompatActivity {
         transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.frameLayout, fragment_myteam).commitAllowingStateLoss();
 
-        db = FirebaseFirestore.getInstance();
+        transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.frameLayout, fragment_mypage).commitAllowingStateLoss();
 
+//        transaction = fragmentManager.beginTransaction();
+//        transaction.replace(R.id.frameLayout, fragment_notification).commitAllowingStateLoss();
+
+
+
+
+        db = FirebaseFirestore.getInstance();
         GetNotificationData();
 
+        System.out.println("테스트 로그");
 
 
     }
@@ -134,41 +154,70 @@ public class MainActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
-                        List list = (List) document.getData().get("invited_team");
 
-                        //아래 반복문은 invited_team 데이터를 DB로 부터 받아 왔을 때 문자열을 분리해주는 반복문이다. '_' 를 기준으로 나눠서 리스트에 담는다.
-                        for(int i=0;i<list.size();i++){
-                            int idx = list.get(i).toString().indexOf("_");
-                            String team_pid = list.get(i).toString().substring(0, idx);
-                            String user_email = list.get(i).toString().substring(idx+1);
-                            inviteteam_pid_list.add(team_pid);
-                            inviter_list.add(user_email);
+                        if(document.get("invited_team").equals("none")){
+                            //만약 초대를 아직 아무에게도 받지 않은 경우다.
                         }
+                        else{
+                            List list = (List) document.getData().get("invited_team");
 
-                        for(int i=0;i<inviter_list.size();i++){
-                            DocumentReference docRef = db.collection("users3").document(inviter_list.get(i));
-                            docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                @Override
-                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                    if (task.isSuccessful()) {
-                                        DocumentSnapshot document = task.getResult();
-                                        if (document.exists()) {
-                                            inviter_nickname_list.add(String.valueOf(document.get("nick_name")));
+                            //아래 반복문은 invited_team 데이터를 DB로 부터 받아 왔을 때 문자열을 분리해주는 반복문이다. '_' 를 기준으로 나눠서 리스트에 담는다.
+                            for(int i=0;i<list.size();i++){
+                                int idx = list.get(i).toString().indexOf("_");
+                                String team_pid = list.get(i).toString().substring(0, idx);
+                                String user_email = list.get(i).toString().substring(idx+1);
+                                inviteteam_pid_list.add(team_pid);
+                                inviter_list.add(user_email);
+                            }
+
+                            System.out.println("야호");
+                            MyNotification_Fragment_data("team_pid",inviteteam_pid_list);
+
+                            for(int i=0;i<inviter_list.size();i++){
+                                DocumentReference docRef = db.collection("users3").document(inviter_list.get(i));
+                                docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                        if (task.isSuccessful()) {
+                                            DocumentSnapshot document = task.getResult();
+                                            if (document.exists()) {
+                                                inviter_nickname_list.add(String.valueOf(document.get("nick_name")));
+                                            }
                                         }
-                                    }
-                                }       //onComplete
+                                    }       //onComplete
 
-
-
-                            });
+                                });
+                            }
                         }
+
+
+
+                        //bundle.putStringArrayList("nick_name",inviter_nickname_list);
+                        //MyNotification_Fragment_data("nick_name",inviter_nickname_list);
 
 
                     }
+                    else{
+
+                    }
                 }
+
+
+
             }       //onComplete
         });
     }
+
+    // 알림Fragment 화면에서 필요로 하는 데이터를 보내기 위한 메소드다. value 로 list 가 들어간다.
+    public void MyNotification_Fragment_data(String key,ArrayList<String> list){
+        transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.frameLayout, fragment_notification).commitAllowingStateLoss();
+        bundle.putStringArrayList(key,list);
+        fragment_notification.setArguments(bundle);
+
+    }
+
+
 
 
 

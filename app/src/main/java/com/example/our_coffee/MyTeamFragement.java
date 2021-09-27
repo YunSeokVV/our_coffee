@@ -57,6 +57,8 @@ public class MyTeamFragement extends Fragment {
     //DB에서 갖고온 사용자의 팀명을 담는다
     ArrayList<String> team_list_name = new ArrayList<String>();
 
+
+
     @Override
     //Called to have the fragment instantiate(예시하다) its user interface view. This is optional, and non-graphical fragments can return null.
     public View onCreateView(LayoutInflater inflater,
@@ -64,6 +66,7 @@ public class MyTeamFragement extends Fragment {
         Log.d("FragmentA", "onCreaeView");
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
+
 
 
         // -- Inflate the layout for this fragment --
