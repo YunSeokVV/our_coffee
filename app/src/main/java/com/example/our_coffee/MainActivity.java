@@ -42,10 +42,6 @@ public class MainActivity extends AppCompatActivity {
     FirebaseAuth mAuth;
     FirebaseUser currentUser;
 
-    String test="It's test";
-    int test2=4;
-    String test3="don't worry";
-
     //FireBase 에 이미지를 저장하기위해 선언한 인스턴스
     FirebaseStorage storage = FirebaseStorage.getInstance();
 
@@ -63,13 +59,15 @@ public class MainActivity extends AppCompatActivity {
 
     // 초대해준 팀의 pid 값을 담는 list 다.
     ArrayList<String> inviteteam_pid_list = new ArrayList<String>();
-    ArrayList<String> inviteteam_pid_list2 = new ArrayList<String>();
 
     // 초대해준 사람의 이메일을 담는 변수다.
     ArrayList<String> inviter_list = new ArrayList<String>();
 
     // 초대해준 사람의 닉네임을 담는 변수다.
     ArrayList<String> inviter_nickname_list = new ArrayList<String>();
+
+    // 초대해준 사람의 팀명을 담는 변수다.
+    ArrayList<String> inviter_teamname_list = new ArrayList<String>();
 
     String TAG="MainActivity";
 
@@ -98,16 +96,17 @@ public class MainActivity extends AppCompatActivity {
         fragmentManager = getSupportFragmentManager();
 
         fragment_myteam = new MyTeamFragement();
-        fragment_notification = new NotificationFragment();
         fragment_mypage = new MyPageFragment();
+        fragment_notification = new NotificationFragment();
+
 
         //FragmentTrasaction 참조 객체를 얻기 위해서는 FragmentManager의 beginTransaction() 함수를 사용.
         transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.frameLayout, fragment_myteam).commitAllowingStateLoss();
 
-        transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.frameLayout, fragment_mypage).commitAllowingStateLoss();
-
+//        transaction = fragmentManager.beginTransaction();
+//        transaction.replace(R.id.frameLayout, fragment_mypage).commitAllowingStateLoss();
+//
 //        transaction = fragmentManager.beginTransaction();
 //        transaction.replace(R.id.frameLayout, fragment_notification).commitAllowingStateLoss();
 
@@ -117,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         GetNotificationData();
 
-        System.out.println("테스트 로그");
+
 
 
     }
@@ -158,6 +157,8 @@ public class MainActivity extends AppCompatActivity {
                         if(document.get("invited_team").equals("none")){
                             //만약 초대를 아직 아무에게도 받지 않은 경우다.
                         }
+
+                        //사용자가 초대를 받은 적이 있는 경우
                         else{
                             List list = (List) document.getData().get("invited_team");
 
@@ -170,30 +171,39 @@ public class MainActivity extends AppCompatActivity {
                                 inviter_list.add(user_email);
                             }
 
-                            System.out.println("야호");
-                            MyNotification_Fragment_data("team_pid",inviteteam_pid_list);
+
 
                             for(int i=0;i<inviter_list.size();i++){
+                                //초대한 사람들의 닉네임을 DB에서 갖고 온다.
                                 DocumentReference docRef = db.collection("users3").document(inviter_list.get(i));
+                                int finalI1 = i;
                                 docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                                     @Override
                                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+
                                         if (task.isSuccessful()) {
                                             DocumentSnapshot document = task.getResult();
                                             if (document.exists()) {
+                                                System.out.println("호출됨1");
                                                 inviter_nickname_list.add(String.valueOf(document.get("nick_name")));
+                                                System.out.println(inviter_nickname_list.get(finalI1));
                                             }
                                         }
+
+                                        if(finalI1 ==inviter_list.size()-1){
+                                            System.out.println("호출됨2");
+                                            Load_Team_name();
+                                        }
+
                                     }       //onComplete
 
                                 });
+
                             }
+
+
+
                         }
-
-
-
-                        //bundle.putStringArrayList("nick_name",inviter_nickname_list);
-                        //MyNotification_Fragment_data("nick_name",inviter_nickname_list);
 
 
                     }
@@ -217,7 +227,43 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    // 초대한 팀의 팀명을 불러오는 메소드다.
+    public void Load_Team_name(){
+        for(int i=0;i<inviter_list.size();i++){
+            System.out.println("미친거지  "+i);
+            int finalI = i;
+            //초대한 사람들의 닉네임을 DB에서 갖고 온다.
+            DocumentReference docRef = db.collection("users3").document(inviter_list.get(i)).collection("team").document(inviteteam_pid_list.get(i));
 
+            docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            System.out.println("호출됨3");
+                            System.out.println(String.valueOf(document.get("team_name"))+"   "+finalI);
+                            inviter_teamname_list.add(String.valueOf(document.get("team_name")));
+                        }
+                    }
+
+                    if(finalI ==inviter_list.size()-1){
+                        System.out.println("호출됨4");
+                MyNotification_Fragment_data("team_name",inviter_teamname_list);
+                MyNotification_Fragment_data("nick_name",inviter_nickname_list);
+                MyNotification_Fragment_data("team_pid",inviteteam_pid_list);
+                MyNotification_Fragment_data("Email",inviter_list);
+                    }
+
+                }       //onComplete
+
+            });
+
+
+
+        }
+    }
 
 
 

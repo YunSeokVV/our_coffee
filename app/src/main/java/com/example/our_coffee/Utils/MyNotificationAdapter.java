@@ -19,8 +19,8 @@ public class MyNotificationAdapter extends RecyclerView.Adapter<MyNotificationAd
 
     Context context;
 
-    private ArrayList<Myteam> mList;
-    ArrayList<Myteam> items=new ArrayList<Myteam>();
+    private ArrayList<MyNotification> mList;
+    ArrayList<MyNotification> items=new ArrayList<MyNotification>();
     //리사이클러뷰의 각 아이템을 클릭할 수 있도록 선언한 객체다.
     OnItemClickListener listener;
 
@@ -29,7 +29,7 @@ public class MyNotificationAdapter extends RecyclerView.Adapter<MyNotificationAd
         public void onItemClick(CustomViewHolder_MyNotification holder, View view, int position);
     }
 
-    public MyNotificationAdapter(ArrayList<Myteam> list,Context context) {
+    public MyNotificationAdapter(ArrayList<MyNotification> list,Context context) {
         this.mList = list;
         this.context=context;
     }
@@ -46,12 +46,12 @@ public class MyNotificationAdapter extends RecyclerView.Adapter<MyNotificationAd
 
     @Override
     public void onBindViewHolder(@NonNull CustomViewHolder_MyNotification viewholder, int position) {
-        final Myteam myteam=mList.get(position);
+        final MyNotification MyNotification=mList.get(position);
 
         viewholder.team_name.setText(mList.get(position).getTeam_name());
 
         Glide.with(viewholder.itemView.getContext())
-                .load(myteam.getImage_url())
+                .load(MyNotification.getImage_url())
                 .into(viewholder.team_profile);
         viewholder.team_profile.setClipToOutline(true);
         //viewholder.setOnItemClickListener(listener);

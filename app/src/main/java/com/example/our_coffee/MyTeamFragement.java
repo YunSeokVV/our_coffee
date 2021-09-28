@@ -63,7 +63,7 @@ public class MyTeamFragement extends Fragment {
     //Called to have the fragment instantiate(예시하다) its user interface view. This is optional, and non-graphical fragments can return null.
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        Log.d("FragmentA", "onCreaeView");
+        Log.d("MyTeamFragment", "onCreaeView");
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
 
@@ -167,13 +167,13 @@ public class MyTeamFragement extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        Log.d("FragmentA", "onAttach");
+        Log.d("MyTeamFragment", "onAttach");
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d("FragmentA","onCreate");
+        Log.d("MyTeamFragment","onCreate");
 
 
 
@@ -183,42 +183,42 @@ public class MyTeamFragement extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Log.d("FragmentA","onActivityCreated");
+        Log.d("MyTeamFragment","onActivityCreated");
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        Log.d("FragmentA","onStart");
+        Log.d("MyTeamFragment","onStart");
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        Log.d("FragmentA","onResume");
+        Log.d("MyTeamFragment","onResume");
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        Log.d("FragmentA", "onPause");
+        Log.d("MyTeamFragment", "onPause");
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        Log.d("FragmentA", "onStop");
+        Log.d("MyTeamFragment", "onStop");
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        Log.d("FragmentA", "onDestroyView");
+        Log.d("MyTeamFragment", "onDestroyView");
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        Log.d("FragmentA", "onDetach");
+        Log.d("MyTeamFragment", "onDetach");
     }
 }
