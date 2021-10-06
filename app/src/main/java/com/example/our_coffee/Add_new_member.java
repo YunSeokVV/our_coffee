@@ -65,6 +65,9 @@ public class Add_new_member extends AppCompatActivity {
     // 현재 초대하려는 팀의 pid 값이 담겨있다.
     String team_pid;
 
+    // 현재 초대하려는 팀의 이름이다.
+    String team_name;
+
     //FireBase 에 이미지를 저장하기위해 선언한 인스턴스
     FirebaseStorage storage = FirebaseStorage.getInstance();
 
@@ -93,19 +96,20 @@ public class Add_new_member extends AppCompatActivity {
         invite_member.setVisibility(View.INVISIBLE);
 
         Intent intent = getIntent(); /*데이터 수신*/
-        team_pid= intent.getExtras().getString("invite_team_pid"); /*String형*/
+        team_pid= intent.getExtras().getString("invite_team_pid");
+        team_name= intent.getExtras().getString("invite_team_name");
 
         //현재 로그인한 사용자의 이메일을 확인
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
 
-
-
+        System.out.println("나오냐");
+        System.out.println(team_name);
 
         //팀원 초대하기 버튼이다. 초대하고 싶은 사용자의 필드값에 팀의 pid 값을 저장 시킨다.
         invite_member.setOnClickListener(new View.OnClickListener() { @Override public void onClick(View view) {
             DocumentReference docRef = db.collection("users3").document(member_email);
-            docRef.update("invited_team", FieldValue.arrayUnion(team_pid+"_"+currentUser.getEmail()));
+            docRef.update("invited_team", FieldValue.arrayUnion(team_pid+"_"+team_name+"_"+currentUser.getEmail()));
 
             Toast myToast = Toast.makeText(getApplicationContext(),"해당 사용자에게 초대 수락 메세지를 보냈습니다 :)", Toast.LENGTH_SHORT);
             myToast.show();

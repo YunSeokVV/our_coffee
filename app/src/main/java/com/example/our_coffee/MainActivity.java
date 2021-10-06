@@ -14,6 +14,8 @@ import android.view.View;
 import android.view.Window;
 
 
+import com.example.our_coffee.Utils.Myteam;
+import com.example.our_coffee.Utils.Team;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -69,12 +71,16 @@ public class MainActivity extends AppCompatActivity {
     // 초대해준 사람의 팀명을 담는 변수다.
     ArrayList<String> inviter_teamname_list = new ArrayList<String>();
 
+    // 초대해준 팀(pid)과 초대원의 닉네임을 표현하는 데이터를 DB로 부터 불러와 담는 변수다.
+    ArrayList<String> invited_teaam_list = new ArrayList<String>();
+
     String TAG="MainActivity";
 
 
-    Bundle bundle=new Bundle();
+    Bundle bundle;
 
-
+    // DB에서 자신의 팀 목록을 표현할 때 필요로 하는 데이터를 받아 올 때 마지막으로 받았을때의 인덱스를 표현해주는 변수다.
+    int team_last_receive=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,7 +96,9 @@ public class MainActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
+        db = FirebaseFirestore.getInstance();
 
+        bundle=new Bundle();
 
         //참조 객체를 얻기 위해서는 getFragmentManager() 함수 호출
         fragmentManager = getSupportFragmentManager();
@@ -113,7 +121,9 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        db = FirebaseFirestore.getInstance();
+
+
+        GetMyTeamFragent();
         GetNotificationData();
 
 
@@ -164,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
 
                             //아래 반복문은 invited_team 데이터를 DB로 부터 받아 왔을 때 문자열을 분리해주는 반복문이다. '_' 를 기준으로 나눠서 리스트에 담는다.
                             for(int i=0;i<list.size();i++){
+                                invited_teaam_list.add(list.get(i).toString());
                                 int idx = list.get(i).toString().indexOf("_");
                                 String team_pid = list.get(i).toString().substring(0, idx);
                                 String user_email = list.get(i).toString().substring(idx+1);
@@ -186,12 +197,17 @@ public class MainActivity extends AppCompatActivity {
                                             if (document.exists()) {
                                                 System.out.println("호출됨1");
                                                 inviter_nickname_list.add(String.valueOf(document.get("nick_name")));
-                                                System.out.println(inviter_nickname_list.get(finalI1));
+                                                //System.out.println(inviter_nickname_list.get(finalI1));
                                             }
                                         }
 
                                         if(finalI1 ==inviter_list.size()-1){
                                             System.out.println("호출됨2");
+//                                            MyNotification_Fragment_data("team_name",inviter_teamname_list);
+//                                            MyNotification_Fragment_data("nick_name",inviter_nickname_list);
+//                                            MyNotification_Fragment_data("team_pid",inviteteam_pid_list);
+//                                            MyNotification_Fragment_data("Email",inviter_list);
+//                                            MyNotification_Fragment_data("invited_team",invited_teaam_list);
                                             Load_Team_name();
                                         }
 
@@ -230,7 +246,6 @@ public class MainActivity extends AppCompatActivity {
     // 초대한 팀의 팀명을 불러오는 메소드다.
     public void Load_Team_name(){
         for(int i=0;i<inviter_list.size();i++){
-            System.out.println("미친거지  "+i);
             int finalI = i;
             //초대한 사람들의 닉네임을 DB에서 갖고 온다.
             DocumentReference docRef = db.collection("users3").document(inviter_list.get(i)).collection("team").document(inviteteam_pid_list.get(i));
@@ -242,21 +257,26 @@ public class MainActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
                         if (document.exists()) {
-                            System.out.println("호출됨3");
-                            System.out.println(String.valueOf(document.get("team_name"))+"   "+finalI);
                             inviter_teamname_list.add(String.valueOf(document.get("team_name")));
+                            System.out.println("확인");
+                            System.out.println(String.valueOf(document.get("team_name")));
+
+
+
                         }
                     }
 
                     if(finalI ==inviter_list.size()-1){
                         System.out.println("호출됨4");
-                MyNotification_Fragment_data("team_name",inviter_teamname_list);
-                MyNotification_Fragment_data("nick_name",inviter_nickname_list);
-                MyNotification_Fragment_data("team_pid",inviteteam_pid_list);
-                MyNotification_Fragment_data("Email",inviter_list);
-                    }
+                        MyNotification_Fragment_data("team_name",inviter_teamname_list);
+                        MyNotification_Fragment_data("nick_name",inviter_nickname_list);
+                        MyNotification_Fragment_data("team_pid",inviteteam_pid_list);
+                        MyNotification_Fragment_data("Email",inviter_list);
+                        MyNotification_Fragment_data("invited_team",invited_teaam_list);
+                            }
 
                 }       //onComplete
+
 
             });
 
@@ -264,6 +284,88 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
+
+    // 나의 팀 목록 화면을 표현할 때 필요한 데이터를 DB에서 갖고오기 위해 사용하는 함수다.
+    public void GetMyTeamFragent(){
+
+        Team team=new Team();
+        ArrayList<Myteam> myteam= new ArrayList<>();;
+
+
+        //DB에서 갖고온 사용자의 팀이미지 url을 담는다
+        ArrayList<String> team_list_imgurl = new ArrayList<String>();
+
+        //DB에서 갖고온 사용자의 팀명을 담는다
+        ArrayList<String> team_list_name = new ArrayList<String>();
+
+        // 나의 팀 목록을 표현하는 리사이클러뷰를 표현하기 위한 리스트
+        ArrayList<Myteam> myteamArrayList = new ArrayList<>();;
+
+        db.collection("users3").document(currentUser.getEmail()).collection("team").get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        //사용자의 팀목록을 데이터를 불러오는데 성공하면 list 에 담는다
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                //절차1-1.로그인한 사용자의 팀목록을 표현하는 uid 값을 FireStore 에서 갖고 와서 team_list_imgurl 에 담는다.
+                                team_list_imgurl.add(document.getId());
+                                // 절차1-2.로그인한 사용자의 팀목록을 표현하는 uid 값을 FireStore 에서 갖고 와서 team_list_name 에 담는다.
+                                team_list_name.add(document.getString("team_name"));
+
+                            }
+                        }
+                        //데이터를 불러오는데 실패한 경우
+                        else {
+
+                        }
+
+                        // 사용자의 팀 목록을 리사이클러뷰로 표현해주는 코드
+                        for(int i=0;i<team_list_imgurl.size();i++){
+                            int finalI = i;
+                            //리사이클러뷰에 담을 아이템 객체 Myteam 을 생성할 때 리스트 안의 값을 바로 담으면 inner class 가 되서 에러가 뜬다. 그래서 임시로 이 변수를 사용.
+                            String tmp=team_list_name.get(i);
+                            StorageReference storageRef = storage.getReference();
+                            // 절차1-3.사용자들의 팀 정보를 표현하기 위해서 team_list_imgurl 에 담긴 uid 값을 바탕으로 FireBase storgae 에서 이미지를 불러온다.
+                            storageRef.child("team_profile/"+team_list_imgurl.get(i)+"/"+currentUser.getEmail()+"_team.jpg").getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Uri> uri) {
+                                    Myteam data2;
+                                    // 절차1-4.사용자들의 팀 정보를 표현하기 위해서 team_list_name 에 담긴 팀명을 사용한다.
+                                    data2 = new Myteam(tmp,uri.toString(),team_list_imgurl.get(finalI));
+
+                                    myteamArrayList.add(0,data2); // RecyclerView의 마지막 줄에 삽입
+                                    System.out.println("확인해보자1");
+                                    System.out.println(myteamArrayList.size());
+                                    //myteamArrayList.add(data2); //마지막 줄에 삽입
+                                    team.setTeam(myteamArrayList);
+                                    //myTeamAdapter.notifyDataSetChanged();
+
+                                    if(team_last_receive==team_list_imgurl.size()-1){
+                                        System.out.println("확인해보자2");
+                                        transaction = fragmentManager.beginTransaction();
+                                        transaction.replace(R.id.frameLayout, fragment_myteam).commitAllowingStateLoss();
+                                        //bundle.putBundle("my_team_list",myteamArrayList);
+                                        bundle.putParcelable("my_team_list",team);
+                                        fragment_myteam.setArguments(bundle);
+                                    }
+                                    team_last_receive++;
+                                }
+
+
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception exception) {
+                                    //이미지를 storage 에서 불러오는데 실패한 경우
+                                }
+                            });
+                        }
+
+
+                    }       //onComplete end
+                });
+    }
+
 
 
 

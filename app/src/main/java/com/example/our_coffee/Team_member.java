@@ -166,6 +166,7 @@ public class Team_member extends AppCompatActivity {
             case R.id.add_new_member:
                 Intent intent = new Intent(getApplicationContext(), Add_new_member.class);
                 intent.putExtra("invite_team_pid",team_pid);
+                intent.putExtra("invite_team_name",toolbar_name);
                 startActivity(intent);
 
                 return true;

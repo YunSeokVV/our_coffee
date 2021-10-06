@@ -1,11 +1,14 @@
 package com.example.our_coffee.Utils;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.our_coffee.R;
@@ -39,7 +42,7 @@ public class MyNotificationAdapter extends RecyclerView.Adapter<MyNotificationAd
     public CustomViewHolder_MyNotification onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         //View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.myteam_list, viewGroup, false);
         LayoutInflater inflater=(LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View itemView=inflater.inflate(R.layout.myteam_list,viewGroup,false);
+        View itemView=inflater.inflate(R.layout.mynotification_list,viewGroup,false);
         //CustomViewHolder_MyTeam viewHolder = new CustomViewHolder_MyTeam(view);
         return new CustomViewHolder_MyNotification(itemView);
     }
@@ -49,6 +52,7 @@ public class MyNotificationAdapter extends RecyclerView.Adapter<MyNotificationAd
         final MyNotification MyNotification=mList.get(position);
 
         viewholder.team_name.setText(mList.get(position).getTeam_name());
+        viewholder.inviter.setText(mList.get(position).getInviter());
 
         Glide.with(viewholder.itemView.getContext())
                 .load(MyNotification.getImage_url())
@@ -66,12 +70,14 @@ public class MyNotificationAdapter extends RecyclerView.Adapter<MyNotificationAd
 
     public class CustomViewHolder_MyNotification extends RecyclerView.ViewHolder {
         protected TextView team_name;
+        protected TextView inviter;
         protected ImageView team_profile;
 
         public CustomViewHolder_MyNotification(View view) {
             super(view);
             this.team_name = (TextView) view.findViewById(R.id.team_name);
             this.team_profile = (ImageView) view.findViewById(R.id.team_profile);
+            this.inviter = (TextView) view.findViewById(R.id.inviter);
             itemView.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View view){
@@ -92,5 +98,7 @@ public class MyNotificationAdapter extends RecyclerView.Adapter<MyNotificationAd
     public int getItemCount() {
         return (null != mList ? mList.size() : 0);
     }
+
+
 
 }
