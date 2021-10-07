@@ -6,6 +6,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -76,6 +77,8 @@ public class MainActivity extends AppCompatActivity {
 
     String TAG="MainActivity";
 
+    // DB에서 필요한 데이터를 다운받기 전까지 화면에 다운중이라는 사실을 알려주기 위환 dialog 다.
+    ProgressDialog dialog;
 
     Bundle bundle;
 
@@ -109,8 +112,8 @@ public class MainActivity extends AppCompatActivity {
 
 
         //FragmentTrasaction 참조 객체를 얻기 위해서는 FragmentManager의 beginTransaction() 함수를 사용.
-        transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.frameLayout, fragment_myteam).commitAllowingStateLoss();
+//        transaction = fragmentManager.beginTransaction();
+//        transaction.replace(R.id.frameLayout, fragment_myteam).commitAllowingStateLoss();
 
 //        transaction = fragmentManager.beginTransaction();
 //        transaction.replace(R.id.frameLayout, fragment_mypage).commitAllowingStateLoss();
@@ -121,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-
+        Download_dialog();
 
         GetMyTeamFragent();
         GetNotificationData();
@@ -174,13 +177,22 @@ public class MainActivity extends AppCompatActivity {
 
                             //아래 반복문은 invited_team 데이터를 DB로 부터 받아 왔을 때 문자열을 분리해주는 반복문이다. '_' 를 기준으로 나눠서 리스트에 담는다.
                             for(int i=0;i<list.size();i++){
-                                invited_teaam_list.add(list.get(i).toString());
-                                int idx = list.get(i).toString().indexOf("_");
-                                String team_pid = list.get(i).toString().substring(0, idx);
-                                String user_email = list.get(i).toString().substring(idx+1);
-                                inviteteam_pid_list.add(team_pid);
-                                inviter_list.add(user_email);
+                                String[] array = list.get(i).toString().split("_");
+                                System.out.println("i의 값 : "+i);
+                                for(int j=0;j<array.length;j++){
+                                    System.out.println(array[j]);
+                                }
                             }
+
+//                            //아래 반복문은 invited_team 데이터를 DB로 부터 받아 왔을 때 문자열을 분리해주는 반복문이다. '_' 를 기준으로 나눠서 리스트에 담는다.
+//                            for(int i=0;i<list.size();i++){
+//                                invited_teaam_list.add(list.get(i).toString());
+//                                int idx = list.get(i).toString().indexOf("_");
+//                                String team_pid = list.get(i).toString().substring(0, idx);
+//                                String user_email = list.get(i).toString().substring(idx+1);
+//                                inviteteam_pid_list.add(team_pid);
+//                                inviter_list.add(user_email);
+//                            }
 
 
 
@@ -289,8 +301,6 @@ public class MainActivity extends AppCompatActivity {
     public void GetMyTeamFragent(){
 
         Team team=new Team();
-        ArrayList<Myteam> myteam= new ArrayList<>();;
-
 
         //DB에서 갖고온 사용자의 팀이미지 url을 담는다
         ArrayList<String> team_list_imgurl = new ArrayList<String>();
@@ -314,6 +324,7 @@ public class MainActivity extends AppCompatActivity {
                                 team_list_name.add(document.getString("team_name"));
 
                             }
+
                         }
                         //데이터를 불러오는데 실패한 경우
                         else {
@@ -327,19 +338,16 @@ public class MainActivity extends AppCompatActivity {
                             String tmp=team_list_name.get(i);
                             StorageReference storageRef = storage.getReference();
                             // 절차1-3.사용자들의 팀 정보를 표현하기 위해서 team_list_imgurl 에 담긴 uid 값을 바탕으로 FireBase storgae 에서 이미지를 불러온다.
-                            storageRef.child("team_profile/"+team_list_imgurl.get(i)+"/"+currentUser.getEmail()+"_team.jpg").getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                            storageRef.child("team_profile/"+team_list_imgurl.get(i)+"/"+currentUser.getEmail()+"_team.jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                 @Override
-                                public void onComplete(@NonNull Task<Uri> uri) {
+                                public void onSuccess(Uri uri) {
                                     Myteam data2;
+
                                     // 절차1-4.사용자들의 팀 정보를 표현하기 위해서 team_list_name 에 담긴 팀명을 사용한다.
                                     data2 = new Myteam(tmp,uri.toString(),team_list_imgurl.get(finalI));
 
-                                    myteamArrayList.add(0,data2); // RecyclerView의 마지막 줄에 삽입
-                                    System.out.println("확인해보자1");
-                                    System.out.println(myteamArrayList.size());
-                                    //myteamArrayList.add(data2); //마지막 줄에 삽입
+                                    myteamArrayList.add(0,data2);
                                     team.setTeam(myteamArrayList);
-                                    //myTeamAdapter.notifyDataSetChanged();
 
                                     if(team_last_receive==team_list_imgurl.size()-1){
                                         System.out.println("확인해보자2");
@@ -348,11 +356,11 @@ public class MainActivity extends AppCompatActivity {
                                         //bundle.putBundle("my_team_list",myteamArrayList);
                                         bundle.putParcelable("my_team_list",team);
                                         fragment_myteam.setArguments(bundle);
+                                        dialog.dismiss();
                                     }
                                     team_last_receive++;
+
                                 }
-
-
                             }).addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception exception) {
@@ -366,7 +374,14 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-
+    // 화면에 필요한 정보들을 보여주기 위해서 DB에서 데이터를 받아올 때 까지 로딩중이라는 사실을 알려주는 다이얼로그 메소드다.
+    public void Download_dialog(){
+        dialog = new ProgressDialog(MainActivity.this);
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setMessage("데이터 확인중");
+        dialog.setCancelable(false);
+        dialog.show();
+    }
 
 
 }

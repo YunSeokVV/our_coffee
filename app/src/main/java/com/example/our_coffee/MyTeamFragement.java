@@ -70,18 +70,11 @@ public class MyTeamFragement extends Fragment {
 
 
 
-        //RequestActivity에서 전달한 번들 저장
-        Bundle bundle = getArguments();
-        team = bundle.getParcelable("my_team_list");
+
 
         //ListView에 띄우기 위해서 ArrayList<String> 생성
         //str_persons = new ArrayList<>();
-        System.out.println("되지 않을까?");
-        for(Myteam myteam:team.getMyteam()){
-            String test = "팀명 " + myteam.getTeam_name() + "  이미지url " + myteam.getImage_url()+"  팀 pid"+myteam.getTeam_pid();
-            System.out.println(test);
-            //str_persons.add(str_person);
-        }
+
 
         // -- Inflate the layout for this fragment --
         return inflater.inflate(R.layout.fragment_myteam, container, false);
@@ -102,10 +95,29 @@ public class MyTeamFragement extends Fragment {
         my_team.setAdapter(myTeamAdapter);
 
 
-//        //아래 두 코드는 리사이클러뷰의 아이템 간격을 조절해주는 코드다.
-//        RecyclerDecoration_Height decoration_height = new RecyclerDecoration_Height(60);
-//        my_team.addItemDecoration(decoration_height);
-//
+        //아래 두 코드는 리사이클러뷰의 아이템 간격을 조절해주는 코드다.
+        RecyclerDecoration_Height decoration_height = new RecyclerDecoration_Height(60);
+        my_team.addItemDecoration(decoration_height);
+
+        //RequestActivity에서 전달한 번들 저장
+        Bundle bundle = getArguments();
+        team = bundle.getParcelable("my_team_list");
+
+        System.out.println("되지 않을까?");
+        for(Myteam myteam:team.getMyteam()){
+            String test = "팀명 " + myteam.getTeam_name() + "  이미지url " + myteam.getImage_url()+"  팀 pid "+myteam.getTeam_pid();
+            System.out.println(test);
+
+            Myteam data2;
+            // 절차1-4.사용자들의 팀 정보를 표현하기 위해서 team_list_name 에 담긴 팀명을 사용한다.
+            data2 = new Myteam(myteam.getTeam_name(),myteam.getImage_url(),myteam.getTeam_pid());
+
+            myteamArrayList.add(0,data2); // RecyclerView의 마지막 줄에 삽입
+            //myteamArrayList.add(data2); //마지막 줄에 삽입
+            myTeamAdapter.notifyDataSetChanged();
+
+        }
+
 //        FirebaseFirestore db = FirebaseFirestore.getInstance();
 //        db.collection("users3").document(currentUser.getEmail()).collection("team").get()
 //        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -120,6 +132,13 @@ public class MyTeamFragement extends Fragment {
 //                    team_list_name.add(document.getString("team_name"));
 //
 //                }
+//
+//                System.out.println("팀 로그 확인2");
+//                for(int i=0;i<team_list_imgurl.size();i++){
+//                    System.out.println(team_list_imgurl.get(i));
+//                    System.out.println(team_list_name.get(i));
+//                }
+//
 //            }
 //            //데이터를 불러오는데 실패한 경우
 //            else {
@@ -139,6 +158,11 @@ public class MyTeamFragement extends Fragment {
 //                        Myteam data2;
 //                        // 절차1-4.사용자들의 팀 정보를 표현하기 위해서 team_list_name 에 담긴 팀명을 사용한다.
 //                        data2 = new Myteam(tmp,uri.toString(),team_list_imgurl.get(finalI));
+//
+//                        System.out.println("리사이클러뷰 아이템 데이터 확인2");
+//                        System.out.println(tmp);
+//                        System.out.println(uri.toString());
+//                        System.out.println(team_list_imgurl.get(finalI));
 //
 //                        myteamArrayList.add(0,data2); // RecyclerView의 마지막 줄에 삽입
 //                        //myteamArrayList.add(data2); //마지막 줄에 삽입
