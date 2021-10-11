@@ -51,7 +51,7 @@ public class Myteam {
         this.team_pid = team_pid;
     }
 
-    //todo : 얜 뭐지?? ㅋㅋㅋ
+    //todo : 얜 뭐지?? 리사이클러뷰의 아이템을 객체 형태로 받기위해 추가한 코드인데 잘 몰라도 원하는 상황이 구현되서 분석은 안함.
     public static final Parcelable.Creator<Myteam> CREATOR = new Parcelable.Creator<Myteam>() {
         @Override
         public Myteam createFromParcel(Parcel in) {

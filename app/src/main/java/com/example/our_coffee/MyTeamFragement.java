@@ -33,7 +33,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-//기능1 : 사용자의 팀목록을 표현하기위해서 아래와 같은 절차를 따른다.
+//기능1 : 사용자의 팀목록을 표현하기위해서 아래와 같은 절차를 따른다.  (이 알고리즘은 더이상 사용하지 않는다.)
 // 절차1-1.로그인한 사용자의 팀목록을 표현하는 uid 값을 FireStore 에서 갖고 와서 team_list_imgurl 에 담는다.
 // 절차1-2.로그인한 사용자의 팀목록을 표현하는 uid 값을 FireStore 에서 갖고 와서 team_list_imgurl 에 담는다.
 // 절차1-3.사용자들의 팀 정보를 표현하기 위해서 team_list_imgurl 에 담긴 uid 값을 바탕으로 FireBase storgae 에서 이미지를 불러온다.
@@ -48,15 +48,6 @@ public class MyTeamFragement extends Fragment {
     //리사이클러뷰 관련 코드
     private ArrayList<Myteam> myteamArrayList;
     private MyTeamAdapter myTeamAdapter;
-
-    //FireBase 에 이미지를 저장하기위해 선언한 인스턴스
-    FirebaseStorage storage = FirebaseStorage.getInstance();
-
-    //DB에서 갖고온 사용자의 팀이미지 url을 담는다
-    ArrayList<String> team_list_imgurl = new ArrayList<String>();
-
-    //DB에서 갖고온 사용자의 팀명을 담는다
-    ArrayList<String> team_list_name = new ArrayList<String>();
 
     Team team;
 
@@ -103,7 +94,7 @@ public class MyTeamFragement extends Fragment {
         Bundle bundle = getArguments();
         team = bundle.getParcelable("my_team_list");
 
-        System.out.println("되지 않을까?");
+        //System.out.println("되지 않을까?");
         for(Myteam myteam:team.getMyteam()){
             String test = "팀명 " + myteam.getTeam_name() + "  이미지url " + myteam.getImage_url()+"  팀 pid "+myteam.getTeam_pid();
             System.out.println(test);
@@ -117,68 +108,6 @@ public class MyTeamFragement extends Fragment {
             myTeamAdapter.notifyDataSetChanged();
 
         }
-
-//        FirebaseFirestore db = FirebaseFirestore.getInstance();
-//        db.collection("users3").document(currentUser.getEmail()).collection("team").get()
-//        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-//        @Override
-//        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-//            //사용자의 팀목록을 데이터를 불러오는데 성공하면 list 에 담는다
-//            if (task.isSuccessful()) {
-//                for (QueryDocumentSnapshot document : task.getResult()) {
-//                    //절차1-1.로그인한 사용자의 팀목록을 표현하는 uid 값을 FireStore 에서 갖고 와서 team_list_imgurl 에 담는다.
-//                    team_list_imgurl.add(document.getId());
-//                    // 절차1-2.로그인한 사용자의 팀목록을 표현하는 uid 값을 FireStore 에서 갖고 와서 team_list_name 에 담는다.
-//                    team_list_name.add(document.getString("team_name"));
-//
-//                }
-//
-//                System.out.println("팀 로그 확인2");
-//                for(int i=0;i<team_list_imgurl.size();i++){
-//                    System.out.println(team_list_imgurl.get(i));
-//                    System.out.println(team_list_name.get(i));
-//                }
-//
-//            }
-//            //데이터를 불러오는데 실패한 경우
-//            else {
-//
-//            }
-//
-//            // 사용자의 팀 목록을 리사이클러뷰로 표현해주는 코드
-//            for(int i=0;i<team_list_imgurl.size();i++){
-//                int finalI = i;
-//                //리사이클러뷰에 담을 아이템 객체 Myteam 을 생성할 때 리스트 안의 값을 바로 담으면 inner class 가 되서 에러가 뜬다. 그래서 임시로 이 변수를 사용.
-//                String tmp=team_list_name.get(i);
-//                StorageReference storageRef = storage.getReference();
-//                // 절차1-3.사용자들의 팀 정보를 표현하기 위해서 team_list_imgurl 에 담긴 uid 값을 바탕으로 FireBase storgae 에서 이미지를 불러온다.
-//                storageRef.child("team_profile/"+team_list_imgurl.get(i)+"/"+currentUser.getEmail()+"_team.jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-//                    @Override
-//                    public void onSuccess(Uri uri) {
-//                        Myteam data2;
-//                        // 절차1-4.사용자들의 팀 정보를 표현하기 위해서 team_list_name 에 담긴 팀명을 사용한다.
-//                        data2 = new Myteam(tmp,uri.toString(),team_list_imgurl.get(finalI));
-//
-//                        System.out.println("리사이클러뷰 아이템 데이터 확인2");
-//                        System.out.println(tmp);
-//                        System.out.println(uri.toString());
-//                        System.out.println(team_list_imgurl.get(finalI));
-//
-//                        myteamArrayList.add(0,data2); // RecyclerView의 마지막 줄에 삽입
-//                        //myteamArrayList.add(data2); //마지막 줄에 삽입
-//                        myTeamAdapter.notifyDataSetChanged();
-//                    }
-//                }).addOnFailureListener(new OnFailureListener() {
-//                    @Override
-//                    public void onFailure(@NonNull Exception exception) {
-//                        //이미지를 storage 에서 불러오는데 실패한 경우
-//                   }
-//                });
-//            }
-//
-//
-//        }       //onComplete end
-//        });
 
         myTeamAdapter.setOnItemClickListener(new MyTeamAdapter.OnItemClickListener() {
             @Override

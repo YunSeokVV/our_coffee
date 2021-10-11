@@ -1,8 +1,9 @@
 package com.example.our_coffee.Utils;
-
+// 나의 알림목록을 리사이클러뷰로 표현할 때 사용하는 어댑터
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -99,6 +100,11 @@ public class MyNotificationAdapter extends RecyclerView.Adapter<MyNotificationAd
         return (null != mList ? mList.size() : 0);
     }
 
-
+    // 리사이클러뷰의 아이템을 삭제하는 메소드다. 초대를 거절 할 경우 호출된다.
+    public void RemoveItem(int position){
+        mList.remove(position);
+        notifyItemRemoved(position);
+        notifyDataSetChanged();
+    }
 
 }

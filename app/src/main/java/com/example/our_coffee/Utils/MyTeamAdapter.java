@@ -1,5 +1,5 @@
 package com.example.our_coffee.Utils;
-
+// 우리팀 목록을 리사이클러뷰로 표현할 때 사용하는 어댑터
 import android.content.Context;
 import android.content.Intent;
 import android.media.Image;
@@ -94,22 +94,6 @@ public class MyTeamAdapter extends RecyclerView.Adapter<MyTeamAdapter.CustomView
 
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     @Override
     public int getItemCount() {

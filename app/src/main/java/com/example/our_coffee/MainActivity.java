@@ -15,7 +15,9 @@ import android.view.View;
 import android.view.Window;
 
 
+import com.example.our_coffee.Utils.MyNotification;
 import com.example.our_coffee.Utils.Myteam;
+import com.example.our_coffee.Utils.Notification;
 import com.example.our_coffee.Utils.Team;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -84,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
 
     // DB에서 자신의 팀 목록을 표현할 때 필요로 하는 데이터를 받아 올 때 마지막으로 받았을때의 인덱스를 표현해주는 변수다.
     int team_last_receive=0;
+    int notification_last_receive=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
         toolbar.setTitleTextColor(Color.BLACK);
 
         setSupportActionBar(toolbar);
+
 
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
@@ -126,9 +130,9 @@ public class MainActivity extends AppCompatActivity {
 
         Download_dialog();
 
-        GetMyTeamFragent();
-        GetNotificationData();
 
+        GetNotificationData();
+        //GetMyTeamFragent();
 
 
 
@@ -159,6 +163,21 @@ public class MainActivity extends AppCompatActivity {
 
     // 알림화면에서 리사이클러뷰를(누가 사용자를 초대해줬는지) 표현하기위해 필요한 데이터들을 이 메소드에서 정리한다.
     public void GetNotificationData(){
+
+        Notification notification=new Notification();
+
+        //DB에서 갖고온 사용자의 pid 값을 담는다. 프로필 사진을 갖고올 때 사용된다.
+        ArrayList<String> team_list_pid = new ArrayList<String>();
+
+        //DB에서 갖고온 사용자의 팀명을 담는다
+        ArrayList<String> team_list_name = new ArrayList<String>();
+
+        //DB에서 갖고온 사용자의 이메일을 담는다
+        ArrayList<String> team_list_Email = new ArrayList<String>();
+
+        // 나의 알람 목록을 표현하는 리사이클러뷰를 표현하기 위한 리스트
+        ArrayList<MyNotification> myNotificationArrayList = new ArrayList<>();;
+
         DocumentReference docRef = db.collection("users3").document(currentUser.getEmail());
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -181,52 +200,58 @@ public class MainActivity extends AppCompatActivity {
                                 System.out.println("i의 값 : "+i);
                                 for(int j=0;j<array.length;j++){
                                     System.out.println(array[j]);
+                                    // 팀의 pid 값을 리스트에 저장.
+                                    if(j==0){
+                                        team_list_pid.add(array[j]);
+                                    }
+                                    else if(j==1){
+                                        team_list_name.add(array[j]);
+                                    }
+                                    else if(j==2){
+                                        team_list_Email.add(array[j]);
+                                    }
                                 }
                             }
 
-//                            //아래 반복문은 invited_team 데이터를 DB로 부터 받아 왔을 때 문자열을 분리해주는 반복문이다. '_' 를 기준으로 나눠서 리스트에 담는다.
-//                            for(int i=0;i<list.size();i++){
-//                                invited_teaam_list.add(list.get(i).toString());
-//                                int idx = list.get(i).toString().indexOf("_");
-//                                String team_pid = list.get(i).toString().substring(0, idx);
-//                                String user_email = list.get(i).toString().substring(idx+1);
-//                                inviteteam_pid_list.add(team_pid);
-//                                inviter_list.add(user_email);
-//                            }
+                            System.out.println("데이터 확인");
+                            System.out.println(list.size());
 
 
+                            // 사용자의 팀 목록을 리사이클러뷰로 표현해주는 코드
+                            for(int i=0;i<list.size();i++){
+                                int finalI = i;
 
-                            for(int i=0;i<inviter_list.size();i++){
-                                //초대한 사람들의 닉네임을 DB에서 갖고 온다.
-                                DocumentReference docRef = db.collection("users3").document(inviter_list.get(i));
-                                int finalI1 = i;
-                                docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                String tmp=team_list_name.get(i);
+                                StorageReference storageRef = storage.getReference();
+                                storageRef.child("team_profile/"+team_list_pid.get(i)+"/"+team_list_Email.get(i)+"_team.jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                     @Override
-                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                    public void onSuccess(Uri uri) {
+                                        MyNotification data2;
 
-                                        if (task.isSuccessful()) {
-                                            DocumentSnapshot document = task.getResult();
-                                            if (document.exists()) {
-                                                System.out.println("호출됨1");
-                                                inviter_nickname_list.add(String.valueOf(document.get("nick_name")));
-                                                //System.out.println(inviter_nickname_list.get(finalI1));
-                                            }
+                                        data2 = new MyNotification(tmp,uri.toString(),team_list_Email.get(finalI),team_list_pid.get(finalI));
+
+                                        myNotificationArrayList.add(0,data2);
+                                        notification.setMyNotifications(myNotificationArrayList);
+
+                                        if(notification_last_receive==list.size()-1){
+                                            System.out.println("확인해보자2");
+                                            transaction = fragmentManager.beginTransaction();
+                                            transaction.replace(R.id.frameLayout, fragment_notification).commitAllowingStateLoss();
+                                            //bundle.putBundle("my_team_list",myteamArrayList);
+                                            bundle.putParcelable("my_notification_list",notification);
+                                            fragment_notification.setArguments(bundle);
+                                            //dialog.dismiss();
+                                            GetMyTeamFragent();
                                         }
+                                        notification_last_receive++;
 
-                                        if(finalI1 ==inviter_list.size()-1){
-                                            System.out.println("호출됨2");
-//                                            MyNotification_Fragment_data("team_name",inviter_teamname_list);
-//                                            MyNotification_Fragment_data("nick_name",inviter_nickname_list);
-//                                            MyNotification_Fragment_data("team_pid",inviteteam_pid_list);
-//                                            MyNotification_Fragment_data("Email",inviter_list);
-//                                            MyNotification_Fragment_data("invited_team",invited_teaam_list);
-                                            Load_Team_name();
-                                        }
-
-                                    }       //onComplete
-
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception exception) {
+                                        //이미지를 storage 에서 불러오는데 실패한 경우
+                                    }
                                 });
-
                             }
 
 
@@ -350,11 +375,11 @@ public class MainActivity extends AppCompatActivity {
                                     team.setTeam(myteamArrayList);
 
                                     if(team_last_receive==team_list_imgurl.size()-1){
-                                        System.out.println("확인해보자2");
                                         transaction = fragmentManager.beginTransaction();
                                         transaction.replace(R.id.frameLayout, fragment_myteam).commitAllowingStateLoss();
                                         //bundle.putBundle("my_team_list",myteamArrayList);
                                         bundle.putParcelable("my_team_list",team);
+                                        bundle.putString("user_Email",currentUser.getEmail());
                                         fragment_myteam.setArguments(bundle);
                                         dialog.dismiss();
                                     }
