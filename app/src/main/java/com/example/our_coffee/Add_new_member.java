@@ -104,6 +104,7 @@ public class Add_new_member extends AppCompatActivity {
         currentUser = mAuth.getCurrentUser();
 
         System.out.println("나오냐");
+        System.out.println(team_pid);
         System.out.println(team_name);
 
         //팀원 초대하기 버튼이다. 초대하고 싶은 사용자의 필드값에 팀의 pid 값을 저장 시킨다.

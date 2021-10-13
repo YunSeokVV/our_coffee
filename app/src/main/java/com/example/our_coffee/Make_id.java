@@ -19,6 +19,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -115,7 +116,7 @@ public class Make_id extends Activity {
                             //DB 에 사용자의 정보를 저장한다. (염창근 교수님의 FireStore 를 사용하며 MatchingApp-Tinder 프로젝트를 사용한다.)
                             Map<String, Object> user_data = new HashMap<>();
                             user_data.put("my_coffee", "아이스 아메리카노");
-                            user_data.put("invited_team", "none");
+                            user_data.put("invited_team", Arrays.asList());
                             user_data.put("nick_name", currentUser.getEmail());
                             user_data.put("my_coffee_option","연한 농도");
 

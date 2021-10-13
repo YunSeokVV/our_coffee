@@ -28,6 +28,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -126,7 +127,8 @@ public class MainActivity extends AppCompatActivity {
 //        transaction.replace(R.id.frameLayout, fragment_notification).commitAllowingStateLoss();
 
 
-
+        DocumentReference doc=db.collection("team3").document("test");
+        doc.update("member_name", FieldValue.arrayUnion("대체왜"));
 
         Download_dialog();
 
@@ -185,13 +187,22 @@ public class MainActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
+                        System.out.println("문서가 존재함");
+                        // 이 변수는 사용자의 초대목록에 데이터가 있는지 판별해준다. 값이 [] 이면 초대받은 데이터가 없다는 것을 의미한다.
+                        String check_invite=String.valueOf(document.get("invited_team"));
 
-                        if(document.get("invited_team").equals("none")){
-                            //만약 초대를 아직 아무에게도 받지 않은 경우다.
+                        //만약 초대를 아직 아무에게도 받지 않은 경우다.
+                        if(String.valueOf(document.get("invited_team")).equals("[]")){
+                            System.out.println("아무에게도 초대 안받음");
+
+
+                            GetMyTeamFragent();
                         }
 
                         //사용자가 초대를 받은 적이 있는 경우
                         else{
+                            System.out.println("초대 받음");
+
                             List list = (List) document.getData().get("invited_team");
 
                             //아래 반복문은 invited_team 데이터를 DB로 부터 받아 왔을 때 문자열을 분리해주는 반복문이다. '_' 를 기준으로 나눠서 리스트에 담는다.
@@ -213,17 +224,13 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
 
-                            System.out.println("데이터 확인");
-                            System.out.println(list.size());
-
-
                             // 사용자의 팀 목록을 리사이클러뷰로 표현해주는 코드
                             for(int i=0;i<list.size();i++){
                                 int finalI = i;
 
                                 String tmp=team_list_name.get(i);
                                 StorageReference storageRef = storage.getReference();
-                                storageRef.child("team_profile/"+team_list_pid.get(i)+"/"+team_list_Email.get(i)+"_team.jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                storageRef.child("team_profile/"+team_list_pid.get(i)+"/"+"team_profile.jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                     @Override
                                     public void onSuccess(Uri uri) {
                                         MyNotification data2;
@@ -234,11 +241,12 @@ public class MainActivity extends AppCompatActivity {
                                         notification.setMyNotifications(myNotificationArrayList);
 
                                         if(notification_last_receive==list.size()-1){
-                                            System.out.println("확인해보자2");
+
                                             transaction = fragmentManager.beginTransaction();
                                             transaction.replace(R.id.frameLayout, fragment_notification).commitAllowingStateLoss();
                                             //bundle.putBundle("my_team_list",myteamArrayList);
                                             bundle.putParcelable("my_notification_list",notification);
+                                            bundle.putString("user_Email",currentUser.getEmail());
                                             fragment_notification.setArguments(bundle);
                                             //dialog.dismiss();
                                             GetMyTeamFragent();
@@ -324,6 +332,7 @@ public class MainActivity extends AppCompatActivity {
 
     // 나의 팀 목록 화면을 표현할 때 필요한 데이터를 DB에서 갖고오기 위해 사용하는 함수다.
     public void GetMyTeamFragent(){
+        System.out.println("GetMyTeamFragent 호출됨");
 
         Team team=new Team();
 
@@ -354,7 +363,18 @@ public class MainActivity extends AppCompatActivity {
                         //데이터를 불러오는데 실패한 경우
                         else {
 
+
                         }
+
+                        //만약 유저가 이 앱을 처음 사용해서 어떠한 팀에도 소속되어 있지 않은경우의 조건문이다. 기능을 다 구현하고 예외처리를 반드시 할 것.
+                        if(team_list_imgurl.size()==0){
+
+                            dialog.dismiss();
+                            transaction = fragmentManager.beginTransaction();
+                            transaction.replace(R.id.frameLayout, fragment_myteam).commitAllowingStateLoss();
+                        }
+
+
 
                         // 사용자의 팀 목록을 리사이클러뷰로 표현해주는 코드
                         for(int i=0;i<team_list_imgurl.size();i++){
@@ -363,7 +383,7 @@ public class MainActivity extends AppCompatActivity {
                             String tmp=team_list_name.get(i);
                             StorageReference storageRef = storage.getReference();
                             // 절차1-3.사용자들의 팀 정보를 표현하기 위해서 team_list_imgurl 에 담긴 uid 값을 바탕으로 FireBase storgae 에서 이미지를 불러온다.
-                            storageRef.child("team_profile/"+team_list_imgurl.get(i)+"/"+currentUser.getEmail()+"_team.jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            storageRef.child("team_profile/"+team_list_imgurl.get(i)+"/"+"team_profile.jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                 @Override
                                 public void onSuccess(Uri uri) {
                                     Myteam data2;

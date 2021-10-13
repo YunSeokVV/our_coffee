@@ -40,9 +40,6 @@ public class Team_member extends AppCompatActivity {
     FirebaseAuth mAuth;
     FirebaseUser currentUser;
 
-    // 툴바에 담길 제목을 담는 변수다
-    String toolbar_name;
-
     //팀원들의 목록을 보여주기 위한 리사이클러뷰다.
     RecyclerView my_team_member;
 
@@ -56,6 +53,9 @@ public class Team_member extends AppCompatActivity {
 
     // 현재 화면에서 표현하고 있는 팀의 고유 pid 값이다
     String team_pid;
+
+    // 현재 화면에서 표현하고 있는 팀의 이름이다.
+    String team_name;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,13 +76,18 @@ public class Team_member extends AppCompatActivity {
 
         Intent intent = getIntent(); /*데이터 수신*/
         team_pid = intent.getExtras().getString("team_pid"); /*String형*/
+        team_name = intent.getExtras().getString("team_name");
 
         System.out.println("team_pid 의 값2");
         System.out.println(team_pid);
+        System.out.println(team_name);
+
+        //팀명을 툴바 제목으로 설정한다.
+        toolbar.setTitle(team_name);
 
         // 팀안의 모든 유저들의 이메일 정보를 DB에서 불러온다.
         db = FirebaseFirestore.getInstance();
-        DocumentReference docRef = db.collection("users3").document(currentUser.getEmail()).collection("team").document(team_pid);
+        DocumentReference docRef = db.collection("team3").document(team_pid);
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -90,9 +95,7 @@ public class Team_member extends AppCompatActivity {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
                         Log.d(TAG, "DocumentSnapshot data: " + document.getData());
-                        toolbar_name = String.valueOf(document.get("team_name"));
-                        //팀명을 툴바 제목으로 설정한다.
-                        toolbar.setTitle(toolbar_name);
+
 
                         team_member_email = (List) document.getData().get("team_member_name");
                         for(int i=0;i<team_member_email.size();i++){
@@ -166,7 +169,7 @@ public class Team_member extends AppCompatActivity {
             case R.id.add_new_member:
                 Intent intent = new Intent(getApplicationContext(), Add_new_member.class);
                 intent.putExtra("invite_team_pid",team_pid);
-                intent.putExtra("invite_team_name",toolbar_name);
+                intent.putExtra("invite_team_name",team_name);
                 startActivity(intent);
 
                 return true;

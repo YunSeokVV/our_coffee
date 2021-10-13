@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,10 +32,15 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -41,6 +48,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class NotificationFragment extends Fragment {
+
+    String TAG="NoticifationFragemnt";
 
     //현재 로그인한 유저의 이메일을 담는 변수다
     String login_user;
@@ -50,12 +59,23 @@ public class NotificationFragment extends Fragment {
     ArrayList<MyNotification> myNotificationArrayList;
     MyNotificationAdapter myNotificationAdapter;
 
+    // 초대받은 팀의 pid를 담는 리스트다.
+    ArrayList<String> team_pid_list = new ArrayList<String>();
+
+    // 초대받은 팀명을 담는 리스트다.
+    ArrayList<String> team_name_list = new ArrayList<String>();
+
+    // 초대한 팀원의 이메일을 담는 리스트다.
+    ArrayList<String> team_inviter_list = new ArrayList<String>();
 
     //FireBase 에 이미지를 저장하기위해 선언한 인스턴스
     FirebaseStorage storage = FirebaseStorage.getInstance();
 
     //MainActivity 에서 알림객체를 받아오기위해 필요하다.
     Notification notification;
+
+    //RequestActivity에서 전달한 번들 저장
+    Bundle bundle;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -84,35 +104,18 @@ public class NotificationFragment extends Fragment {
         RecyclerDecoration_Height decoration_height = new RecyclerDecoration_Height(60);
         my_notification.addItemDecoration(decoration_height);
 
-        //RequestActivity에서 전달한 번들 저장
-        Bundle bundle = getArguments();
-        notification = bundle.getParcelable("my_notification_list");
-        login_user=bundle.getString("user_Email");
-
-
         db = FirebaseFirestore.getInstance();
 
-        System.out.println("되지 않을까?");
-        for(MyNotification myNotification:notification.getMyNotifications()){
-            String test = "팀명 " + myNotification.getTeam_name() + "  이미지url " + myNotification.getImage_url()+"  초대자 메일 "+myNotification.getInviter()+"    초대팀pid "+myNotification.getTeam_pid();
-            System.out.println(test);
-
-            MyNotification data2;
-
-            data2 = new MyNotification(myNotification.getTeam_name(),myNotification.getImage_url(),myNotification.getInviter(),myNotification.getTeam_pid());
-
-            myNotificationArrayList.add(0,data2); // RecyclerView의 마지막 줄에 삽입
-            myNotificationAdapter.notifyDataSetChanged();
-
+        //RequestActivity에서 전달한 번들 저장
+        bundle = getArguments();
+        if(bundle!=null){
+            System.out.println("로그 확인1");
+            Load_existing_user();
+        }
+        else{
+            System.out.println("번들 null");
         }
 
-        myNotificationAdapter.setOnItemClickListener(new MyNotificationAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(MyNotificationAdapter.CustomViewHolder_MyNotification holder, View view, int position) {
-                DialogClick(position);
-
-            }
-        });
 
     }       //onViewCreated end
 
@@ -183,22 +186,42 @@ public class NotificationFragment extends Fragment {
             @Override
             public void onClick(DialogInterface dialog, int which)
             {
-                Toast.makeText(getContext(), "Yeah!!", Toast.LENGTH_LONG).show(); } });
+                // 초대받을 팀의 pid 값.
+                String team_pid;
+                team_pid=myNotificationArrayList.get(position).getTeam_pid();
+
+                //초대 받은 팀에 나 자신을 추가한다. (team3 컬렉션의 초대받은 팀 목록에서 나 자신을 추가한다.)
+                DocumentReference doc=db.collection("team3").document(team_pid);
+                doc.update("team_member_name", FieldValue.arrayUnion(login_user));
+
+
+                //나의 팀목록에서 초대받은 팀을 추가한다. (users3컬렉션의 team 컬렉션에 새로운 팀pid 문서를 추가.)
+                Map<String, Object> data2 = new HashMap<>();
+                data2.put("team_name", team_name_list.get(position));
+                db.collection("users3").document(login_user).collection("team").document(team_pid).set(data2)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Log.d(TAG, "DocumentSnapshot successfully written!");
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.w(TAG, "Error writing document", e);
+                            }
+                        });
+
+                Delete_invitation(position);
+
+                Toast.makeText(getContext(), "새로운 팀이 추가되었습니다!!", Toast.LENGTH_LONG).show();
+            } });
         // 초대를 거절한경우. 초대목록에서 아이템을 제거하고 DB에서도 삭제 시킨다.
         builder.setNegativeButton("거절", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                //DB에서 저장할 값을 잠시 저장하기 위한 변수
-                String tmp;
-                tmp=myNotificationArrayList.get(position).getTeam_pid()+"_"+myNotificationArrayList.get(position).getTeam_name()+"_"+myNotificationArrayList.get(position).getInviter();
-                System.out.println("데이터 확인!!!");
-                System.out.println(tmp);
-
-                DocumentReference docRef=db.collection("users3").document(login_user);
-                docRef.update("invited_team", FieldValue.arrayRemove(tmp));
-
-                myNotificationAdapter.RemoveItem(position);
+                Delete_invitation(position);
                 Toast myToast = Toast.makeText(getContext(),"초대를 거절했습니다", Toast.LENGTH_SHORT);
                 myToast.show();
             } });
@@ -210,5 +233,57 @@ public class NotificationFragment extends Fragment {
         });
         AlertDialog alertDialog = builder.create(); alertDialog.show();
     }
+
+    //자신의 초대 목록에서 특정 초대를 제외하는 메소드.
+    public void Delete_invitation(int position){
+        //DB에서 사용할 값을 잠시 저장하기 위한 변수
+        String tmp;
+        tmp=team_pid_list.get(position)+"_"+team_name_list.get(position)+"_"+team_inviter_list.get(position);
+        team_pid_list.remove(position);
+        team_name_list.remove(position);
+        team_inviter_list.remove(position);
+
+        //초대 목록에서 거절한 팀을 제외하는 코드
+        DocumentReference docRef=db.collection("users3").document(login_user);
+        docRef.update("invited_team", FieldValue.arrayRemove(tmp));
+
+        //리사이클러뷰에서 현재 팀을 제거한다.
+        myNotificationAdapter.RemoveItem(position);
+    }
+
+    // 알람 목록이 있는 사용자가 로그인한 경우 알람목록을 리사이클러뷰로 표현한다.
+    public void Load_existing_user(){
+        System.out.println("로그 확인2");
+        notification = bundle.getParcelable("my_notification_list");
+        login_user=bundle.getString("user_Email");
+
+        System.out.println(login_user);
+        System.out.println("되지 않을까?");
+        for(MyNotification myNotification:notification.getMyNotifications()){
+            String test = "팀명 " + myNotification.getTeam_name() + "  이미지url " + myNotification.getImage_url()+"  초대자 메일 "+myNotification.getInviter()+"    초대팀pid "+myNotification.getTeam_pid();
+            System.out.println(test);
+
+            MyNotification data2;
+
+            data2 = new MyNotification(myNotification.getTeam_name()+"로 부터 초대 알림이 왔어요!!",myNotification.getImage_url(),"초대자 : "+myNotification.getInviter(),myNotification.getTeam_pid());
+
+            myNotificationArrayList.add(0,data2); // RecyclerView의 마지막 줄에 삽입
+            team_pid_list.add(0,myNotification.getTeam_pid());
+            team_name_list.add(0,myNotification.getTeam_name());
+            team_inviter_list.add(0,myNotification.getInviter());
+            myNotificationAdapter.notifyDataSetChanged();
+
+        }
+
+        myNotificationAdapter.setOnItemClickListener(new MyNotificationAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(MyNotificationAdapter.CustomViewHolder_MyNotification holder, View view, int position) {
+                DialogClick(position);
+
+            }
+        });
+    }
+
+
 
 }

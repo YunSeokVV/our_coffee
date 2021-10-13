@@ -23,12 +23,15 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.storage.FirebaseStorage;
@@ -48,7 +51,8 @@ public class Make_newteam extends AppCompatActivity {
     //FireBase 에 이미지를 저장하기위해 선언한 인스턴스
     FirebaseStorage storage = FirebaseStorage.getInstance();
 
-    Toolbar toolbar;
+    // users3 컬렉션속 team 컬렉션의 문서 pid 값이다.
+    String team_pid;
     Button make_team;
     EditText team_name;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -105,16 +109,37 @@ public class Make_newteam extends AppCompatActivity {
 
 
                     Map<String, Object> data = new HashMap<>();
-                    data.put("team_member_name", Arrays.asList(currentUser.getEmail()));
+                    //data.put("team_member_name", Arrays.asList(currentUser.getEmail()));
                     data.put("team_name",team_name.getText().toString());
-                    //data.put("team_img_url",null);
-                    db.collection("users3").document(currentUser.getEmail()).collection("team").add(data)
-                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    //users3 컬렉션에 새로운 팀의 정보를 추가한다.
+                    db.collection("users3").document(currentUser.getEmail()).collection("team").add(data).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                             @Override
                             public void onSuccess(DocumentReference documentReference) {
-                                user_team_img = storageRef.child("team_profile/"+documentReference.getId()+"/"+currentUser.getEmail()+"_team.jpg");
+                                user_team_img = storageRef.child("team_profile/"+documentReference.getId()+"/"+"team_profile.jpg");
+
                                 Upload_team_profile();
-                                finish();
+                                team_pid=documentReference.getId();
+
+                                Map<String, Object> team_data = new HashMap<>();
+                                team_data.put("team_member_name", "none");
+
+                                //팀을 만든다.
+                                db.collection("team3").document(team_pid).set(team_data).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        Log.v(TAG, "DocumentSnapshot successfully written!");
+
+                                        //만들어진 팀에 나 자신을 추가한다.
+                                        DocumentReference doc=db.collection("team3").document(team_pid);
+                                        doc.update("team_member_name", FieldValue.arrayUnion(currentUser.getEmail()));
+                                        finish();
+                                    }})
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.v(TAG, "Error writing document", e);
+                                        }
+                                    });
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
@@ -123,6 +148,8 @@ public class Make_newteam extends AppCompatActivity {
                                 Log.w(TAG, "Error adding document", e);
                             }
                         });
+
+
 
 
 

@@ -50,6 +50,7 @@ public class MyTeamFragement extends Fragment {
     private MyTeamAdapter myTeamAdapter;
 
     Team team;
+    Bundle bundle;
 
     @Override
     //Called to have the fragment instantiate(예시하다) its user interface view. This is optional, and non-graphical fragments can return null.
@@ -91,34 +92,13 @@ public class MyTeamFragement extends Fragment {
         my_team.addItemDecoration(decoration_height);
 
         //RequestActivity에서 전달한 번들 저장
-        Bundle bundle = getArguments();
-        team = bundle.getParcelable("my_team_list");
+        bundle = getArguments();
+        if(bundle!=null){
 
-        //System.out.println("되지 않을까?");
-        for(Myteam myteam:team.getMyteam()){
-            String test = "팀명 " + myteam.getTeam_name() + "  이미지url " + myteam.getImage_url()+"  팀 pid "+myteam.getTeam_pid();
-            System.out.println(test);
-
-            Myteam data2;
-            // 절차1-4.사용자들의 팀 정보를 표현하기 위해서 team_list_name 에 담긴 팀명을 사용한다.
-            data2 = new Myteam(myteam.getTeam_name(),myteam.getImage_url(),myteam.getTeam_pid());
-
-            myteamArrayList.add(0,data2); // RecyclerView의 마지막 줄에 삽입
-            //myteamArrayList.add(data2); //마지막 줄에 삽입
-            myTeamAdapter.notifyDataSetChanged();
-
+            Load_existing_user();
         }
 
-        myTeamAdapter.setOnItemClickListener(new MyTeamAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(MyTeamAdapter.CustomViewHolder_MyTeam holder, View view, int position) {
-                Intent intent = new Intent(getContext(), Team_member.class);
-                intent.putExtra("team_pid",myteamArrayList.get(position).getTeam_pid());
 
-                startActivity(intent);
-
-            }
-        });
 
 
 
@@ -189,5 +169,36 @@ public class MyTeamFragement extends Fragment {
     public void onDetach() {
         super.onDetach();
         Log.d("MyTeamFragment", "onDetach");
+    }
+
+    // 팀목록이 있는 사용자가 로그인한 경우 팀목록을 리사이클러뷰로 표현한다.
+    public void Load_existing_user(){
+        team = bundle.getParcelable("my_team_list");
+        //System.out.println("되지 않을까?");
+        for(Myteam myteam:team.getMyteam()){
+            String test = "팀명 " + myteam.getTeam_name() + "  이미지url " + myteam.getImage_url()+"  팀 pid "+myteam.getTeam_pid();
+            System.out.println(test);
+
+            Myteam data2;
+            // 절차1-4.사용자들의 팀 정보를 표현하기 위해서 team_list_name 에 담긴 팀명을 사용한다.
+            data2 = new Myteam(myteam.getTeam_name(),myteam.getImage_url(),myteam.getTeam_pid());
+
+            myteamArrayList.add(0,data2); // RecyclerView의 마지막 줄에 삽입
+            //myteamArrayList.add(data2); //마지막 줄에 삽입
+            myTeamAdapter.notifyDataSetChanged();
+
+        }
+
+        myTeamAdapter.setOnItemClickListener(new MyTeamAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(MyTeamAdapter.CustomViewHolder_MyTeam holder, View view, int position) {
+                Intent intent = new Intent(getContext(), Team_member.class);
+                intent.putExtra("team_pid",myteamArrayList.get(position).getTeam_pid());
+                intent.putExtra("team_name",myteamArrayList.get(position).getTeam_name());
+
+                startActivity(intent);
+
+            }
+        });
     }
 }
