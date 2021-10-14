@@ -3,10 +3,12 @@ package com.example.our_coffee;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -125,6 +127,8 @@ public class MainActivity extends AppCompatActivity {
 //
 //        transaction = fragmentManager.beginTransaction();
 //        transaction.replace(R.id.frameLayout, fragment_notification).commitAllowingStateLoss();
+
+
 
 
         DocumentReference doc=db.collection("team3").document("test");
@@ -288,48 +292,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    // 초대한 팀의 팀명을 불러오는 메소드다.
-    public void Load_Team_name(){
-        for(int i=0;i<inviter_list.size();i++){
-            int finalI = i;
-            //초대한 사람들의 닉네임을 DB에서 갖고 온다.
-            DocumentReference docRef = db.collection("users3").document(inviter_list.get(i)).collection("team").document(inviteteam_pid_list.get(i));
-
-            docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        if (document.exists()) {
-                            inviter_teamname_list.add(String.valueOf(document.get("team_name")));
-                            System.out.println("확인");
-                            System.out.println(String.valueOf(document.get("team_name")));
-
-
-
-                        }
-                    }
-
-                    if(finalI ==inviter_list.size()-1){
-                        System.out.println("호출됨4");
-                        MyNotification_Fragment_data("team_name",inviter_teamname_list);
-                        MyNotification_Fragment_data("nick_name",inviter_nickname_list);
-                        MyNotification_Fragment_data("team_pid",inviteteam_pid_list);
-                        MyNotification_Fragment_data("Email",inviter_list);
-                        MyNotification_Fragment_data("invited_team",invited_teaam_list);
-                            }
-
-                }       //onComplete
-
-
-            });
-
-
-
-        }
-    }
-
     // 나의 팀 목록 화면을 표현할 때 필요한 데이터를 DB에서 갖고오기 위해 사용하는 함수다.
     public void GetMyTeamFragent(){
         System.out.println("GetMyTeamFragent 호출됨");
@@ -426,6 +388,12 @@ public class MainActivity extends AppCompatActivity {
         dialog.setMessage("데이터 확인중");
         dialog.setCancelable(false);
         dialog.show();
+    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
 

@@ -6,6 +6,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import de.hdodenhof.circleimageview.CircleImageView;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -69,12 +70,18 @@ public class Make_newteam extends AppCompatActivity {
     StorageReference storageRef = storage.getReference();
     StorageReference user_team_img;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_make_newteam);
 
+        Intent returnIntent = new Intent();
+        returnIntent.putExtra("result", "이게 될까?");
+        setResult(Activity.RESULT_OK,returnIntent);
+        finish();
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         toolbar.setTitle("나의 팀 이름");
@@ -133,6 +140,8 @@ public class Make_newteam extends AppCompatActivity {
                                         DocumentReference doc=db.collection("team3").document(team_pid);
                                         doc.update("team_member_name", FieldValue.arrayUnion(currentUser.getEmail()));
                                         finish();
+
+                                        //check point
                                     }})
                                     .addOnFailureListener(new OnFailureListener() {
                                         @Override

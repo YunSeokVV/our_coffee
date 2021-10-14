@@ -8,19 +8,28 @@
     android:background="@color/white"
     >
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/my_team"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_team_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:scrollbarFadeDuration="0"
-        android:scrollbarSize="10dp"
-        android:scrollbarThumbVertical="@android:color/darker_gray"
-        android:scrollbars="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/my_team"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:scrollbarFadeDuration="0"
+            android:scrollbarSize="10dp"
+            android:scrollbarThumbVertical="@android:color/darker_gray"
+            android:scrollbars="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <ImageView
         android:id="@+id/imageView"
