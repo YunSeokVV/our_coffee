@@ -119,8 +119,13 @@ public class MyTeamFragement extends Fragment {
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getContext(), Make_newteam.class);
-                startActivity(intent);
+
+                Intent i = new Intent(getActivity(), Make_newteam.class);
+                i.putExtra("helloString", "helloString!!");
+
+                startActivityForResult(i, 1);
+//                Intent intent = new Intent(getContext(), Make_newteam.class);
+//                startActivity(intent);
             }
         });
 
@@ -158,10 +163,7 @@ public class MyTeamFragement extends Fragment {
         super.onActivityCreated(savedInstanceState);
         Log.d("MyTeamFragment","onActivityCreated");
 
-        Intent i = new Intent(getActivity(), Make_newteam.class);
-        i.putExtra("helloString", "helloString!!");
 
-        startActivityForResult(i, 1);
 
     }
 
@@ -208,8 +210,23 @@ public class MyTeamFragement extends Fragment {
         getActivity();
         if(requestCode == 1 && resultCode == Activity.RESULT_OK) {
             //some code
-            Log.v("MyTeamFragment","sdafasdfasdf");
-            Log.v("MyTeamFragment",data.getStringExtra("result"));
+            Log.v("MyTeamFragment",data.getStringExtra("reload"));
+
+            // 이 변수를 통해 리사이클러뷰 새로고침 여부를 파악한다.
+            String reload="nothing";
+            String team_pid;
+            String team_name;
+            reload=data.getStringExtra("reload");
+            team_pid=data.getStringExtra("team_pid");
+            team_name=data.getStringExtra("team_name");
+            Log.v("MyTeamFragment","reload 의 값 : "+reload);
+            Log.v("MyTeamFragment","team_pid 의 값 : "+team_pid);
+            Log.v("MyTeamFragment","team_name 의 값 : "+team_name);
+
+            if(reload.equals("reload_data")){
+                Log.v("MyTeamFragment","조건문이 실행됨");
+                AddNewTeam(team_name,team_pid);
+            }
 
         }
     }
@@ -289,6 +306,11 @@ public class MyTeamFragement extends Fragment {
                                 String tmp=team_list_name.get(i);
                                 StorageReference storageRef = storage.getReference();
 
+                                Log.v(TAG,"check-data");
+                                Log.v(TAG,"team_list_pid.get(i) "+team_list_pid.get(i));
+                                Log.v(TAG,"tmp "+tmp);
+
+
                                 storageRef.child("team_profile/"+team_list_pid.get(i)+"/"+"team_profile.jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                     @Override
                                     public void onSuccess(Uri uri) {
@@ -308,6 +330,7 @@ public class MyTeamFragement extends Fragment {
                                     @Override
                                     public void onFailure(@NonNull Exception exception) {
                                         //이미지를 storage 에서 불러오는데 실패한 경우
+                                        Log.v(TAG,"excetion "+exception);
                                     }
                                 });
                             }
@@ -321,5 +344,32 @@ public class MyTeamFragement extends Fragment {
                     }       //onComplete end
                 });
     }
+
+    // 새로운 팀을 개설했을 때 리사이클러뷰에 새로운 팀을 추가한다.
+    public void AddNewTeam(String team_name,String team_pid){
+        StorageReference storageRef = storage.getReference();
+        Log.v(TAG,"AddNewTeam 메소드 호출");
+        storageRef.child("team_profile/"+team_pid+"/"+"team_profile.jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Log.v(TAG,"OnSuccess 라는데");
+                Myteam data2;
+                data2 = new Myteam(team_name,uri.toString(),team_pid);
+                myteamArrayList.add(0,data2);
+                myTeamAdapter.notifyDataSetChanged();
+                swipeRefreshLayout.setRefreshing(false);
+
+            }
+
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                //이미지를 storage 에서 불러오는데 실패한 경우
+                Log.v(TAG,"excetion "+exception);
+            }
+        });
+
+    }
+
 
 }

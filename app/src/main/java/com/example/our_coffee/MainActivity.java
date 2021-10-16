@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
@@ -65,20 +66,9 @@ public class MainActivity extends AppCompatActivity {
     private FragmentTransaction transaction;
     Toolbar toolbar;
 
-    // 초대해준 팀의 pid 값을 담는 list 다.
-    ArrayList<String> inviteteam_pid_list = new ArrayList<String>();
-
-    // 초대해준 사람의 이메일을 담는 변수다.
-    ArrayList<String> inviter_list = new ArrayList<String>();
-
-    // 초대해준 사람의 닉네임을 담는 변수다.
-    ArrayList<String> inviter_nickname_list = new ArrayList<String>();
-
-    // 초대해준 사람의 팀명을 담는 변수다.
-    ArrayList<String> inviter_teamname_list = new ArrayList<String>();
-
-    // 초대해준 팀(pid)과 초대원의 닉네임을 표현하는 데이터를 DB로 부터 불러와 담는 변수다.
-    ArrayList<String> invited_teaam_list = new ArrayList<String>();
+    // 나의 팀 목록을 표현하는 리사이클러뷰를 표현하기 위한 리스트
+    ArrayList<Myteam> myteamArrayList;
+    Team team=new Team();
 
     String TAG="MainActivity";
 
@@ -296,16 +286,13 @@ public class MainActivity extends AppCompatActivity {
     public void GetMyTeamFragent(){
         System.out.println("GetMyTeamFragent 호출됨");
 
-        Team team=new Team();
-
         //DB에서 갖고온 사용자의 팀이미지 url을 담는다
         ArrayList<String> team_list_imgurl = new ArrayList<String>();
 
         //DB에서 갖고온 사용자의 팀명을 담는다
         ArrayList<String> team_list_name = new ArrayList<String>();
 
-        // 나의 팀 목록을 표현하는 리사이클러뷰를 표현하기 위한 리스트
-        ArrayList<Myteam> myteamArrayList = new ArrayList<>();;
+        myteamArrayList = new ArrayList<>();;
 
         db.collection("users3").document(currentUser.getEmail()).collection("team").get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -394,6 +381,66 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Log.v(TAG,"onActivityResult 호출");
+
+        if(requestCode == 1 && resultCode == Activity.RESULT_OK) {
+            Log.v(TAG,"상황1");
+            Log.v(TAG, String.valueOf(requestCode));
+            Log.v(TAG, String.valueOf(resultCode));
+            Log.v(TAG,data.getStringExtra("reload"));
+
+            // 이 변수를 통해 리사이클러뷰 새로고침 여부를 파악한다.
+            String reload="nothing";
+            String team_pid;
+            String team_name;
+            reload=data.getStringExtra("reload");
+            team_pid=data.getStringExtra("team_pid");
+            team_name=data.getStringExtra("team_name");
+            Log.v("MyTeamFragment","reload 의 값 : "+reload);
+            Log.v("MyTeamFragment","team_pid 의 값 : "+team_pid);
+            Log.v("MyTeamFragment","team_name 의 값 : "+team_name);
+
+        }
+        else{
+            Log.v(TAG,"상황2");
+        }
+        if(resultCode==3135678){
+            Log.v(TAG,"상황3");
+            Log.v(TAG, String.valueOf(requestCode));
+            Log.v(TAG, String.valueOf(resultCode));
+
+            String reload="nothing";
+            String team_pid;
+            String team_name;
+            reload=data.getStringExtra("reload");
+            team_pid=data.getStringExtra("team_pid");
+            team_name=data.getStringExtra("team_name");
+            Log.v(TAG,"reload 의 값 : "+reload);
+            Log.v(TAG,"team_pid 의 값 : "+team_pid);
+            Log.v(TAG,"team_name 의 값 : "+team_name);
+
+
+            StorageReference storageRef = storage.getReference();
+            // 절차1-3.사용자들의 팀 정보를 표현하기 위해서 team_list_imgurl 에 담긴 uid 값을 바탕으로 FireBase storgae 에서 이미지를 불러온다.
+            storageRef.child("team_profile/"+team_pid+"/"+"team_profile.jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                @Override
+                public void onSuccess(Uri uri) {
+                    Myteam data2;
+
+                    // 절차1-4.사용자들의 팀 정보를 표현하기 위해서 team_list_name 에 담긴 팀명을 사용한다.
+                    data2 = new Myteam(team_name,uri.toString(),team_pid);
+
+                    myteamArrayList.add(0,data2);
+                    team.setTeam(myteamArrayList);
+
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    //이미지를 storage 에서 불러오는데 실패한 경우
+                }
+            });
+        }
     }
 
 

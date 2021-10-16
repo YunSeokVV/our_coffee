@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -70,7 +71,8 @@ public class Make_newteam extends AppCompatActivity {
     StorageReference storageRef = storage.getReference();
     StorageReference user_team_img;
 
-
+    // DB에서 필요한 데이터를 추가하기 전까지 화면에 다운중이라는 사실을 알려주기 위환 dialog 다.
+    ProgressDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,10 +80,6 @@ public class Make_newteam extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_make_newteam);
 
-        Intent returnIntent = new Intent();
-        returnIntent.putExtra("result", "이게 될까?");
-        setResult(Activity.RESULT_OK,returnIntent);
-        finish();
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         toolbar.setTitle("나의 팀 이름");
@@ -101,7 +99,7 @@ public class Make_newteam extends AppCompatActivity {
         make_team.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                Upload_dialog();
                 //만약 팀명을 입력하지 않았으면 입력하라고 Toast 메세지를 띄운다.
                 if(team_name.getText().toString().equals("")){
                     Toast myToast = Toast.makeText(Make_newteam.this,"팀명을 입력하세요", Toast.LENGTH_SHORT);
@@ -110,53 +108,51 @@ public class Make_newteam extends AppCompatActivity {
 
                 //사용자가 새로운 팀을 생성한다. (DB에 데이터 추가)
                 else{
-                    Toast myToast = Toast.makeText(Make_newteam.this,"팀 생성을 완료했습니다! 새로운 팀원들을 초대해보세요 :)", Toast.LENGTH_SHORT);
-                    myToast.show();
-
-
 
                     Map<String, Object> data = new HashMap<>();
                     //data.put("team_member_name", Arrays.asList(currentUser.getEmail()));
                     data.put("team_name",team_name.getText().toString());
                     //users3 컬렉션에 새로운 팀의 정보를 추가한다.
                     db.collection("users3").document(currentUser.getEmail()).collection("team").add(data).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                            @Override
-                            public void onSuccess(DocumentReference documentReference) {
-                                user_team_img = storageRef.child("team_profile/"+documentReference.getId()+"/"+"team_profile.jpg");
+                        @Override
+                        public void onSuccess(DocumentReference documentReference) {
+                            Log.v(TAG, "DocumentSnapshot users-team 컬렉션에 데이터 추가");
+                            user_team_img = storageRef.child("team_profile/"+documentReference.getId()+"/"+"team_profile.jpg");
 
-                                Upload_team_profile();
-                                team_pid=documentReference.getId();
+                            Upload_team_profile();
+                            team_pid=documentReference.getId();
 
-                                Map<String, Object> team_data = new HashMap<>();
-                                team_data.put("team_member_name", "none");
+                            Map<String, Object> team_data = new HashMap<>();
+                            team_data.put("team_member_name", "none");
 
-                                //팀을 만든다.
-                                db.collection("team3").document(team_pid).set(team_data).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        Log.v(TAG, "DocumentSnapshot successfully written!");
+                            //팀을 만든다.
+                            db.collection("team3").document(team_pid).set(team_data).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    Log.v(TAG, "DocumentSnapshot successfully written!");
 
-                                        //만들어진 팀에 나 자신을 추가한다.
-                                        DocumentReference doc=db.collection("team3").document(team_pid);
-                                        doc.update("team_member_name", FieldValue.arrayUnion(currentUser.getEmail()));
-                                        finish();
+                                    //만들어진 팀에 나 자신을 추가한다.
+                                    DocumentReference doc=db.collection("team3").document(team_pid);
+                                    doc.update("team_member_name", FieldValue.arrayUnion(currentUser.getEmail()));
 
-                                        //check point
-                                    }})
+
+
+                                    //check point
+                                }})
                                     .addOnFailureListener(new OnFailureListener() {
                                         @Override
                                         public void onFailure(@NonNull Exception e) {
                                             Log.v(TAG, "Error writing document", e);
                                         }
                                     });
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.w(TAG, "Error adding document", e);
-                            }
-                        });
+                        }
+                    })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w(TAG, "Error adding document", e);
+                                }
+                            });
 
 
 
@@ -220,10 +216,31 @@ public class Make_newteam extends AppCompatActivity {
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Log.v(TAG, "서버에 이미지저장 완료!");
+                Intent returnIntent = new Intent();
+                returnIntent.putExtra("reload", "reload_data");
+                returnIntent.putExtra("team_pid", team_pid);
+                returnIntent.putExtra("team_name", team_name.getText().toString());
+                setResult(3135678,returnIntent);
+                setResult(RESULT_OK,returnIntent);
+                finish();
+                dialog.dismiss();
+                Toast myToast = Toast.makeText(Make_newteam.this,"팀 생성을 완료했습니다! 새로운 팀원들을 초대해보세요 :)", Toast.LENGTH_SHORT);
+                myToast.show();
+
                 // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
                 // ...
             }
         });
+    }
+
+    // DB에 이미지를 저장하기 전까지 기다리는 메소드
+    public void Upload_dialog(){
+        dialog = new ProgressDialog(Make_newteam.this);
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setMessage("새로운 팀 생성중");
+        dialog.show();
+
     }
 
 }
