@@ -46,7 +46,7 @@ import java.util.Map;
 
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NotificationFragment.OnTimePickerSetListener{
 
     FirebaseAuth mAuth;
     FirebaseUser currentUser;
@@ -86,6 +86,9 @@ public class MainActivity extends AppCompatActivity {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+
 
         toolbar = (Toolbar)findViewById(R.id.toolbar);
         toolbar.setTitle("나의 팀 목록");
@@ -158,8 +161,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // 알림화면에서 리사이클러뷰를(누가 사용자를 초대해줬는지) 표현하기위해 필요한 데이터들을 이 메소드에서 정리한다.
+    //앱이 가장 먼저 실행됐을때 호출된다. 사용자가 팀 초대 수락을 받아서 팀이 추가될 때는 이 메소드가 호출되지 않는다.
     public void GetNotificationData(){
-
+        System.out.println("GetNotificationData 호출됨");
         Notification notification=new Notification();
 
         //DB에서 갖고온 사용자의 pid 값을 담는다. 프로필 사진을 갖고올 때 사용된다.
@@ -181,10 +185,6 @@ public class MainActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
-                        System.out.println("문서가 존재함");
-                        // 이 변수는 사용자의 초대목록에 데이터가 있는지 판별해준다. 값이 [] 이면 초대받은 데이터가 없다는 것을 의미한다.
-                        String check_invite=String.valueOf(document.get("invited_team"));
-
                         //만약 초대를 아직 아무에게도 받지 않은 경우다.
                         if(String.valueOf(document.get("invited_team")).equals("[]")){
                             System.out.println("아무에게도 초대 안받음");
@@ -218,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
 
-                            // 사용자의 팀 목록을 리사이클러뷰로 표현해주는 코드
+                            // 사용자의 알림 목록을 리사이클러뷰로 표현해주는 코드
                             for(int i=0;i<list.size();i++){
                                 int finalI = i;
 
@@ -238,7 +238,6 @@ public class MainActivity extends AppCompatActivity {
 
                                             transaction = fragmentManager.beginTransaction();
                                             transaction.replace(R.id.frameLayout, fragment_notification).commitAllowingStateLoss();
-                                            //bundle.putBundle("my_team_list",myteamArrayList);
                                             bundle.putParcelable("my_notification_list",notification);
                                             bundle.putString("user_Email",currentUser.getEmail());
                                             fragment_notification.setArguments(bundle);
@@ -259,6 +258,104 @@ public class MainActivity extends AppCompatActivity {
 
 
                         }
+
+
+                    }
+                    else{
+
+                    }
+                }
+
+
+
+            }       //onComplete
+        });
+    }
+
+    // 초대 목록에서 새로운 팀을 초대 수락 받은 경우 DB에서 초대 목록 데이터를 새로 갖고온다.
+    public void GetAdditionalNotificationData(){
+        System.out.println("GetAdditionalNotificationData 호출됨");
+        Notification notification=new Notification();
+
+        //DB에서 갖고온 사용자의 pid 값을 담는다. 프로필 사진을 갖고올 때 사용된다.
+        ArrayList<String> team_list_pid = new ArrayList<String>();
+
+        //DB에서 갖고온 사용자의 팀명을 담는다
+        ArrayList<String> team_list_name = new ArrayList<String>();
+
+        //DB에서 갖고온 사용자의 이메일을 담는다
+        ArrayList<String> team_list_Email = new ArrayList<String>();
+
+        // 나의 알람 목록을 표현하는 리사이클러뷰를 표현하기 위한 리스트
+        ArrayList<MyNotification> myNotificationArrayList = new ArrayList<>();;
+
+        DocumentReference docRef = db.collection("users3").document(currentUser.getEmail());
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                            List list = (List) document.getData().get("invited_team");
+
+                            //아래 반복문은 invited_team 데이터를 DB로 부터 받아 왔을 때 문자열을 분리해주는 반복문이다. '_' 를 기준으로 나눠서 리스트에 담는다.
+                            for(int i=0;i<list.size();i++){
+                                String[] array = list.get(i).toString().split("_");
+                                System.out.println("i의 값 : "+i);
+                                for(int j=0;j<array.length;j++){
+                                    System.out.println(array[j]);
+                                    // 팀의 pid 값을 리스트에 저장.
+                                    if(j==0){
+                                        team_list_pid.add(array[j]);
+                                    }
+                                    else if(j==1){
+                                        team_list_name.add(array[j]);
+                                    }
+                                    else if(j==2){
+                                        team_list_Email.add(array[j]);
+                                    }
+                                }
+                            }
+
+                            // 사용자의 알림 목록을 리사이클러뷰로 표현해주는 코드
+                            for(int i=0;i<list.size();i++){
+                                int finalI = i;
+
+                                String tmp=team_list_name.get(i);
+                                StorageReference storageRef = storage.getReference();
+                                storageRef.child("team_profile/"+team_list_pid.get(i)+"/"+"team_profile.jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                    @Override
+                                    public void onSuccess(Uri uri) {
+                                        MyNotification data2;
+
+                                        data2 = new MyNotification(tmp,uri.toString(),team_list_Email.get(finalI),team_list_pid.get(finalI));
+
+                                        myNotificationArrayList.add(0,data2);
+                                        notification.setMyNotifications(myNotificationArrayList);
+
+                                        if(notification_last_receive==list.size()-1){
+
+                                            transaction = fragmentManager.beginTransaction();
+                                            transaction.replace(R.id.frameLayout, fragment_notification).commitAllowingStateLoss();
+                                            bundle.putParcelable("my_notification_list",notification);
+                                            bundle.putString("user_Email",currentUser.getEmail());
+                                            fragment_notification.setArguments(bundle);
+
+                                        }
+                                        notification_last_receive++;
+
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception exception) {
+                                        //이미지를 storage 에서 불러오는데 실패한 경우
+                                    }
+                                });
+                            }
+
+
+
+
 
 
                     }
@@ -317,12 +414,20 @@ public class MainActivity extends AppCompatActivity {
 
                         //만약 유저가 이 앱을 처음 사용해서 어떠한 팀에도 소속되어 있지 않은경우의 조건문이다. 기능을 다 구현하고 예외처리를 반드시 할 것.
                         if(team_list_imgurl.size()==0){
-
+                            Log.v(TAG,"현재 아무런 팀에도 소속되어 있지 않다.");
+                            bundle.putString("team_exist","no");
                             dialog.dismiss();
+                            bundle.putString("user_Email",currentUser.getEmail());
+                            fragment_myteam.setArguments(bundle);
                             transaction = fragmentManager.beginTransaction();
                             transaction.replace(R.id.frameLayout, fragment_myteam).commitAllowingStateLoss();
                         }
 
+                        for(int i=0;i<team_list_imgurl.size();i++){
+                            Myteam data;
+                            data = new Myteam("work","work","work");
+                            myteamArrayList.add(i,data);
+                        }
 
 
                         // 사용자의 팀 목록을 리사이클러뷰로 표현해주는 코드
@@ -340,14 +445,20 @@ public class MainActivity extends AppCompatActivity {
                                     // 절차1-4.사용자들의 팀 정보를 표현하기 위해서 team_list_name 에 담긴 팀명을 사용한다.
                                     data2 = new Myteam(tmp,uri.toString(),team_list_imgurl.get(finalI));
 
-                                    myteamArrayList.add(0,data2);
+                                    //원본코드
+                                    //myteamArrayList.add(0,data2);
+
+                                    myteamArrayList.set(finalI,data2);
+
                                     team.setTeam(myteamArrayList);
 
+                                    // 마지막으로 Storage 에서 데이터를 받아왔을 때 실행되는 조건문이다.
                                     if(team_last_receive==team_list_imgurl.size()-1){
+                                        Log.v(TAG,"마지막 반복문 수행됨");
                                         transaction = fragmentManager.beginTransaction();
                                         transaction.replace(R.id.frameLayout, fragment_myteam).commitAllowingStateLoss();
-                                        //bundle.putBundle("my_team_list",myteamArrayList);
                                         bundle.putParcelable("my_team_list",team);
+                                        bundle.putString("team_exist","yes");
                                         bundle.putString("user_Email",currentUser.getEmail());
                                         fragment_myteam.setArguments(bundle);
                                         dialog.dismiss();
@@ -382,6 +493,9 @@ public class MainActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Log.v(TAG,"onActivityResult 호출");
+        Log.v(TAG,"requestCode "+requestCode);
+        Log.v(TAG,"resultCode "+resultCode);
+
 
         if(requestCode == 1 && resultCode == Activity.RESULT_OK) {
             Log.v(TAG,"상황1");
@@ -401,9 +515,53 @@ public class MainActivity extends AppCompatActivity {
             Log.v("MyTeamFragment","team_name 의 값 : "+team_name);
 
         }
+
+        // Make_newteam 액티비티에서 새로운 팀을 생성하고 나면 팀목록을 표현하는 리사이클러뷰에 새로 추가된 팀을 추가한다.
+        //원래는 resultCode 를 임의로 설정해서 이 상황을 처리하려고 했지만 어째서인지 갑자기 되지 않는다.
         else{
             Log.v(TAG,"상황2");
+            String reload="nothing";
+            String team_pid;
+            String team_name;
+            reload=data.getStringExtra("reload");
+            team_pid=data.getStringExtra("team_pid");
+            team_name=data.getStringExtra("team_name");
+            Log.v(TAG,"reload 의 값 : "+reload);
+            Log.v(TAG,"team_pid 의 값 : "+team_pid);
+            Log.v(TAG,"team_name 의 값 : "+team_name);
+
+            if(reload.equals("reload_data")){
+                StorageReference storageRef = storage.getReference();
+                storageRef.child("team_profile/"+team_pid+"/"+"team_profile.jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        Myteam data2;
+                        data2 = new Myteam(team_name,uri.toString(),team_pid);
+
+                        //myteamArrayList.add(0,data2);
+                        myteamArrayList.add(data2); //마지막 줄에 삽입
+                        team.setTeam(myteamArrayList);
+
+
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        //이미지를 storage 에서 불러오는데 실패한 경우
+                    }
+                });
+            }
+
+            // Make_newteam 에서 뒤로가기 버튼을 누른 경우의 조건문. 이렇게 예외 처리를 안하면 reload 로 받는 값이 null 이여서 앱이 튕긴다.
+            else if(reload.equals("back_btn")){
+
+            }
+
+
         }
+
+        //todo : 21.10.15 개발을 할 때 까지만 해도 Make_newteam 액티비티에서 팀을 생성하고 finish 가 된 다음에 이 조건문이 실행 됐었다. 하지만 다음날인 16일 부터는 왜인지 이 조건문이 타지지가 않았다.
+        //이 조건문에 대한 자세한 설명을 확인하고 싶다면 16일의 에버노트 내용을 참고할 것.
         if(resultCode==3135678){
             Log.v(TAG,"상황3");
             Log.v(TAG, String.valueOf(requestCode));
@@ -427,11 +585,12 @@ public class MainActivity extends AppCompatActivity {
                 public void onSuccess(Uri uri) {
                     Myteam data2;
 
-                    // 절차1-4.사용자들의 팀 정보를 표현하기 위해서 team_list_name 에 담긴 팀명을 사용한다.
+
                     data2 = new Myteam(team_name,uri.toString(),team_pid);
 
-                    myteamArrayList.add(0,data2);
-                    team.setTeam(myteamArrayList);
+                    // 만약 이 조건문이 실행된다면 아래의 add 의 인덱스 값을 가장 마지막으로 설정하기.
+                    //myteamArrayList.add(0,data2);
+                    //team.setTeam(myteamArrayList);
 
                 }
             }).addOnFailureListener(new OnFailureListener() {
@@ -444,4 +603,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    public void onTimePickerSet(String a, String b) {
+        Log.v(TAG,"onTimePickerSet");
+        GetMyTeamFragent();
+        GetNotificationData();
+        Log.v(TAG,a);
+        Log.v(TAG,b);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+
+    }
 }

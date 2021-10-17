@@ -28,6 +28,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -57,9 +59,6 @@ public class MyTeamFragement extends Fragment {
 
     //FireBase 에 이미지를 저장하기위해 선언한 인스턴스
     FirebaseStorage storage = FirebaseStorage.getInstance();
-
-    // DB에서 자신의 팀 목록을 표현할 때 필요로 하는 데이터를 받아 올 때 마지막으로 받았을때의 인덱스를 표현해주는 변수다.
-    int team_last_receive=0;
 
     SwipeRefreshLayout swipeRefreshLayout;
     RecyclerView my_team;
@@ -133,8 +132,10 @@ public class MyTeamFragement extends Fragment {
             @Override
             public void onRefresh() {
                 myteamArrayList.clear();
-                ReloadMyTeam();
-
+                //ReloadMyTeam();
+                Load_existing_user();
+                myTeamAdapter.notifyDataSetChanged();
+                swipeRefreshLayout.setRefreshing(false);
 
 
             }
@@ -233,33 +234,49 @@ public class MyTeamFragement extends Fragment {
 
     // 팀목록이 있는 사용자가 로그인한 경우 팀목록을 리사이클러뷰로 표현한다.
     public void Load_existing_user(){
-        team = bundle.getParcelable("my_team_list");
+        Log.v(TAG,"Load_existing_user 호출됨");
 
-        for(Myteam myteam:team.getMyteam()){
-            String test = "팀명 " + myteam.getTeam_name() + "  이미지url " + myteam.getImage_url()+"  팀 pid "+myteam.getTeam_pid();
+        // 현재 DB에 사용자에게 소속된 팀이 존재하는지 판단해주는 변수다. 있으면 yes, 없으면 no 가 저장된다.
+        String team_exist;
+        team_exist=bundle.getString("team_exist");
+        Log.v(TAG,"team_exist : "+team_exist);
+        if(team_exist.equals("yes")){
+            team = bundle.getParcelable("my_team_list");
+
+            Log.v(TAG,team.getMyteam().toString());
+
+            for(Myteam myteam:team.getMyteam()){
+                String test = "팀명 " + myteam.getTeam_name() + "  이미지url " + myteam.getImage_url()+"  팀 pid "+myteam.getTeam_pid();
 
 
-            Myteam data2;
-            // 절차1-4.사용자들의 팀 정보를 표현하기 위해서 team_list_name 에 담긴 팀명을 사용한다.
-            data2 = new Myteam(myteam.getTeam_name(),myteam.getImage_url(),myteam.getTeam_pid());
+                Myteam data2;
+                // 절차1-4.사용자들의 팀 정보를 표현하기 위해서 team_list_name 에 담긴 팀명을 사용한다.
+                data2 = new Myteam(myteam.getTeam_name(),myteam.getImage_url(),myteam.getTeam_pid());
 
-            myteamArrayList.add(0,data2); // RecyclerView의 마지막 줄에 삽입
-            //myteamArrayList.add(data2); //마지막 줄에 삽입
-            myTeamAdapter.notifyDataSetChanged();
+                myteamArrayList.add(0,data2); // RecyclerView의 마지막 줄에 삽입
 
-        }
-
-        myTeamAdapter.setOnItemClickListener(new MyTeamAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(MyTeamAdapter.CustomViewHolder_MyTeam holder, View view, int position) {
-                Intent intent = new Intent(getContext(), Team_member.class);
-                intent.putExtra("team_pid",myteamArrayList.get(position).getTeam_pid());
-                intent.putExtra("team_name",myteamArrayList.get(position).getTeam_name());
-
-                startActivity(intent);
+                //myteamArrayList.add(data2); //마지막 줄에 삽입
+                myTeamAdapter.notifyDataSetChanged();
 
             }
-        });
+
+            myTeamAdapter.setOnItemClickListener(new MyTeamAdapter.OnItemClickListener() {
+                @Override
+                public void onItemClick(MyTeamAdapter.CustomViewHolder_MyTeam holder, View view, int position) {
+                    Intent intent = new Intent(getContext(), Team_member.class);
+                    intent.putExtra("team_pid",myteamArrayList.get(position).getTeam_pid());
+                    intent.putExtra("team_name",myteamArrayList.get(position).getTeam_name());
+
+                    startActivity(intent);
+
+                }
+            });
+        }
+
+        else if(team_exist.equals("no")){
+            Log.v(TAG,"아무런 팀 데이터가 없음");
+        }
+
     }
 
     // 나의 팀 목록 화면을 새로고침 한다.
@@ -298,6 +315,12 @@ public class MyTeamFragement extends Fragment {
                         // DB에 사용자의 팀목록 데이터가 존재하는 경우다.
                         else{
 
+                            for(int i=0;i<team_list_pid.size();i++){
+                                Myteam data;
+                                data = new Myteam("work","work","work");
+                                myteamArrayList.add(i,data);
+                            }
+
                             // 사용자의 팀 목록을 리사이클러뷰로 표현해주는 코드
                             for(int i=0;i<team_list_pid.size();i++){
 
@@ -316,9 +339,11 @@ public class MyTeamFragement extends Fragment {
                                     public void onSuccess(Uri uri) {
                                         Myteam data2;
                                         data2 = new Myteam(tmp,uri.toString(),team_list_pid.get(finalI));
-                                        myteamArrayList.add(0,data2);
-                                        if(team_list_pid.size()==myteamArrayList.size()){
+                                        //myteamArrayList.add(0,data2);
+                                        myteamArrayList.set(finalI,data2);
 
+                                        if(team_list_pid.size()==myteamArrayList.size()){
+                                            //Collections.reverse(myteamArrayList);
                                             //아래 두 코드는 리사이클러뷰의 아이템 간격을 조절해주는 코드다.
                                             myTeamAdapter.notifyDataSetChanged();
                                             swipeRefreshLayout.setRefreshing(false);
@@ -356,6 +381,7 @@ public class MyTeamFragement extends Fragment {
                 Myteam data2;
                 data2 = new Myteam(team_name,uri.toString(),team_pid);
                 myteamArrayList.add(0,data2);
+                //myteamArrayList.add(data2); //마지막 줄에 삽입
                 myTeamAdapter.notifyDataSetChanged();
                 swipeRefreshLayout.setRefreshing(false);
 

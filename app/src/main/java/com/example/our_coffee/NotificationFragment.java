@@ -2,6 +2,7 @@ package com.example.our_coffee;
 // 이 프레그먼트는 다른팀으로부터 초대 메세지를 확인하기 위한 Frament 다.
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -77,6 +78,8 @@ public class NotificationFragment extends Fragment {
     //RequestActivity에서 전달한 번들 저장
     Bundle bundle;
 
+    OnTimePickerSetListener onTimePickerSetListener;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -120,8 +123,14 @@ public class NotificationFragment extends Fragment {
     }       //onViewCreated end
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if(context instanceof OnTimePickerSetListener){
+            onTimePickerSetListener=(OnTimePickerSetListener)context;
+        }else{
+            throw new RuntimeException(context.toString()+"must implent OnTimePickerSetListener");
+        }
+
 
     }
 
@@ -176,7 +185,7 @@ public class NotificationFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-
+        onTimePickerSetListener=null;
     }
 
     public void DialogClick(int position) {
@@ -186,6 +195,9 @@ public class NotificationFragment extends Fragment {
             @Override
             public void onClick(DialogInterface dialog, int which)
             {
+
+                onTimePickerSetListener.onTimePickerSet("되냐?", "된다");
+
                 // 초대받을 팀의 pid 값.
                 String team_pid;
                 team_pid=myNotificationArrayList.get(position).getTeam_pid();
@@ -203,6 +215,7 @@ public class NotificationFragment extends Fragment {
                             @Override
                             public void onSuccess(Void aVoid) {
                                 Log.d(TAG, "DocumentSnapshot successfully written!");
+
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
@@ -284,6 +297,10 @@ public class NotificationFragment extends Fragment {
         });
     }
 
+
+    public interface  OnTimePickerSetListener{
+        void onTimePickerSet(String a,String b);
+    }
 
 
 }

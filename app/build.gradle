@@ -9,7 +9,9 @@ android {
 
     defaultConfig {
         applicationId "com.example.our_coffee"
-        minSdkVersion 28
+        //원래 28인데 애뮬레이터 하나 돌릴려고 바꿈
+        //minSdkVersion 28
+        minSdkVersion 25
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"

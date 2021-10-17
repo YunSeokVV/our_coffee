@@ -180,6 +180,10 @@ public class Make_newteam extends AppCompatActivity {
     //좌측 상단의 왼쪽으로 향하는 화살표 버튼. 이전 화면으로 되돌아 간다.
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId()==android.R.id.home/*지정한 id*/){
+
+            Intent returnIntent = new Intent();
+            returnIntent.putExtra("reload", "cancled");
+            setResult(RESULT_OK,returnIntent);
             finish();
             return true;
         }
@@ -241,6 +245,15 @@ public class Make_newteam extends AppCompatActivity {
         dialog.setMessage("새로운 팀 생성중");
         dialog.show();
 
+    }
+
+    // 뒤로가기 버튼을 누르는 경우 MainActivty 의 onActivityResult 에서 reload 의 value 값이 null 이 되서 따로 설정했다.
+    @Override
+    public void onBackPressed() {
+        Intent returnIntent = new Intent();
+        returnIntent.putExtra("reload", "back_btn");
+        setResult(RESULT_OK,returnIntent);
+        finish();
     }
 
 }
