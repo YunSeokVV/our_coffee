@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
@@ -46,7 +47,10 @@ import java.util.Map;
 
 
 
-public class MainActivity extends AppCompatActivity implements NotificationFragment.OnTimePickerSetListener{
+public class MainActivity extends AppCompatActivity implements NotificationFragment.InvitationAcceptedListener,NotificationFragment.NotificationRefreshListener{
+
+
+
 
     FirebaseAuth mAuth;
     FirebaseUser currentUser;
@@ -80,14 +84,13 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
     // DB에서 자신의 팀 목록을 표현할 때 필요로 하는 데이터를 받아 올 때 마지막으로 받았을때의 인덱스를 표현해주는 변수다.
     int team_last_receive=0;
     int notification_last_receive=0;
-
+    int additinoal_notification_last_receive=0;
+    int additional_team_last_receive=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
 
 
         toolbar = (Toolbar)findViewById(R.id.toolbar);
@@ -111,6 +114,10 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
         fragment_notification = new NotificationFragment();
 
 
+
+
+
+
         //FragmentTrasaction 참조 객체를 얻기 위해서는 FragmentManager의 beginTransaction() 함수를 사용.
 //        transaction = fragmentManager.beginTransaction();
 //        transaction.replace(R.id.frameLayout, fragment_myteam).commitAllowingStateLoss();
@@ -122,16 +129,11 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
 //        transaction.replace(R.id.frameLayout, fragment_notification).commitAllowingStateLoss();
 
 
-
-
-        DocumentReference doc=db.collection("team3").document("test");
-        doc.update("member_name", FieldValue.arrayUnion("대체왜"));
-
         Download_dialog();
 
 
         GetNotificationData();
-        //GetMyTeamFragent();
+
 
 
 
@@ -237,7 +239,7 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
                                         if(notification_last_receive==list.size()-1){
 
                                             transaction = fragmentManager.beginTransaction();
-                                            transaction.replace(R.id.frameLayout, fragment_notification).commitAllowingStateLoss();
+                                            transaction.replace(R.id.frameLayout, fragment_notification,"NoticifationFragemnt").commitAllowingStateLoss();
                                             bundle.putParcelable("my_notification_list",notification);
                                             bundle.putString("user_Email",currentUser.getEmail());
                                             fragment_notification.setArguments(bundle);
@@ -272,9 +274,9 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
         });
     }
 
-    // 초대 목록에서 새로운 팀을 초대 수락 받은 경우 DB에서 초대 목록 데이터를 새로 갖고온다.
+    // 초대 목록에서 새로운 팀을 초대 수락 받은 경우 DB에서 초대 목록 데이터를 새로 갖고 온다.
     public void GetAdditionalNotificationData(){
-        System.out.println("GetAdditionalNotificationData 호출됨");
+        Log.v(TAG,"GetAdditionalNotificationData 호출됨");
         Notification notification=new Notification();
 
         //DB에서 갖고온 사용자의 pid 값을 담는다. 프로필 사진을 갖고올 때 사용된다.
@@ -293,15 +295,19 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                Log.v(TAG,"GetAdditionalNotificationData 1");
                 if (task.isSuccessful()) {
+                    Log.v(TAG,"GetAdditionalNotificationData 2");
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
-                            List list = (List) document.getData().get("invited_team");
+                        Log.v(TAG,"GetAdditionalNotificationData 3");
+                        List list = (List) document.getData().get("invited_team");
+                        Log.v(TAG,"list 크기 : "+list.size());
 
                             //아래 반복문은 invited_team 데이터를 DB로 부터 받아 왔을 때 문자열을 분리해주는 반복문이다. '_' 를 기준으로 나눠서 리스트에 담는다.
                             for(int i=0;i<list.size();i++){
                                 String[] array = list.get(i).toString().split("_");
-                                System.out.println("i의 값 : "+i);
+                                Log.v(TAG,"GetAdditionalNotificationData i의 값 : "+i);
                                 for(int j=0;j<array.length;j++){
                                     System.out.println(array[j]);
                                     // 팀의 pid 값을 리스트에 저장.
@@ -317,51 +323,77 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
                                 }
                             }
 
-                            // 사용자의 알림 목록을 리사이클러뷰로 표현해주는 코드
-                            for(int i=0;i<list.size();i++){
-                                int finalI = i;
+                            // 사용자의 초대 목록에 아무런 데이터가 없는 경우다.
+                            if(list.size()==0){
+                                Log.v(TAG,"사용자의 초대 목록에 아무런 데이터가 없는 경우");
+                                myNotificationArrayList.clear();
+                                notification.setMyNotifications(myNotificationArrayList);
+                                transaction = fragmentManager.beginTransaction();
+                                transaction.replace(R.id.frameLayout, fragment_notification,"NoticifationFragemnt").commitAllowingStateLoss();
+                                bundle.putParcelable("my_notification_list",notification);
+                                bundle.putString("user_Email",currentUser.getEmail());
+                                fragment_notification.setArguments(bundle);
 
-                                String tmp=team_list_name.get(i);
-                                StorageReference storageRef = storage.getReference();
-                                storageRef.child("team_profile/"+team_list_pid.get(i)+"/"+"team_profile.jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        MyNotification data2;
+                                transaction=fragmentManager.beginTransaction();
+                                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout,fragment_notification,"NoticifationFragemnt").commit();
 
-                                        data2 = new MyNotification(tmp,uri.toString(),team_list_Email.get(finalI),team_list_pid.get(finalI));
-
-                                        myNotificationArrayList.add(0,data2);
-                                        notification.setMyNotifications(myNotificationArrayList);
-
-                                        if(notification_last_receive==list.size()-1){
-
-                                            transaction = fragmentManager.beginTransaction();
-                                            transaction.replace(R.id.frameLayout, fragment_notification).commitAllowingStateLoss();
-                                            bundle.putParcelable("my_notification_list",notification);
-                                            bundle.putString("user_Email",currentUser.getEmail());
-                                            fragment_notification.setArguments(bundle);
-
-                                        }
-                                        notification_last_receive++;
-
-                                    }
-                                }).addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception exception) {
-                                        //이미지를 storage 에서 불러오는데 실패한 경우
-                                    }
-                                });
+                                getSupportFragmentManager().executePendingTransactions();
+                                FragmentManager fm=getSupportFragmentManager();
+                                NotificationFragment fragment=(NotificationFragment)fm.findFragmentByTag("NoticifationFragemnt");
+                                fragment.methodCallFromActivity();
                             }
 
+                            // 사용자의 초대 목록에 데이터가 1개 이상 있는 경우다.
+                            else{
+                                Log.v(TAG,"사용자의 초대 목록에 데이터가 있는 경우");
+                                // 사용자의 알림 목록을 리사이클러뷰로 표현해주는 코드
+                                for(int i=0;i<list.size();i++){
+                                    int finalI = i;
+                                    Log.v(TAG,"additinoal_notification_last_receive : "+additinoal_notification_last_receive);
 
+                                    String tmp=team_list_name.get(i);
+                                    StorageReference storageRef = storage.getReference();
+                                    storageRef.child("team_profile/"+team_list_pid.get(i)+"/"+"team_profile.jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            MyNotification data2;
 
+                                            data2 = new MyNotification(tmp,uri.toString(),team_list_Email.get(finalI),team_list_pid.get(finalI));
 
+                                            myNotificationArrayList.add(0,data2);
+                                            notification.setMyNotifications(myNotificationArrayList);
 
+                                            // 사용자의 초대 목록에 데이터가 1개 이상인 경우다.
+                                            if(additinoal_notification_last_receive==list.size()-1){
+                                                Log.v(TAG,"사용자의 초대목록에 데이터가 1개 이상인 경우");
+                                                transaction = fragmentManager.beginTransaction();
+                                                transaction.replace(R.id.frameLayout, fragment_notification).commitAllowingStateLoss();
+                                                bundle.putParcelable("my_notification_list",notification);
+                                                bundle.putString("user_Email",currentUser.getEmail());
+                                                fragment_notification.setArguments(bundle);
+                                                additinoal_notification_last_receive=0;
+                                            }
+                                            additinoal_notification_last_receive++;
 
+                                        }
+                                    }).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception exception) {
+                                            //이미지를 storage 에서 불러오는데 실패한 경우
+                                        }
+                                    });
+                                }
+                            }
                     }
+
+                    //DB에 문서가 없는 경우
                     else{
-
+                        Log.v(TAG,"GetAdditionalNotificationData document 가 없는 경우");
                     }
+                }
+                //task is not successful
+                else{
+                    Log.v(TAG,"GetAdditionalNotificationData task not successful"+task.isCanceled());
                 }
 
 
@@ -456,14 +488,106 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
                                     if(team_last_receive==team_list_imgurl.size()-1){
                                         Log.v(TAG,"마지막 반복문 수행됨");
                                         transaction = fragmentManager.beginTransaction();
-                                        transaction.replace(R.id.frameLayout, fragment_myteam).commitAllowingStateLoss();
+                                        transaction.replace(R.id.frameLayout, fragment_myteam,"MyTeamFragment").commitAllowingStateLoss();
                                         bundle.putParcelable("my_team_list",team);
                                         bundle.putString("team_exist","yes");
                                         bundle.putString("user_Email",currentUser.getEmail());
                                         fragment_myteam.setArguments(bundle);
                                         dialog.dismiss();
+                                        team_last_receive=0;
+
+
+//                                        transaction=fragmentManager.beginTransaction();
+//                                        getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout,fragment_notification,"NoticifationFragemnt").commit();
+//
+//                                        getSupportFragmentManager().executePendingTransactions();
+//                                        FragmentManager fm = getSupportFragmentManager();
+//                                        NotificationFragment fragment = (NotificationFragment)fm.findFragmentByTag("NoticifationFragemnt");
+//                                        Log.v(TAG,"sdf "+(NotificationFragment)fm.findFragmentByTag("NoticifationFragemnt"));
+//                                        fragment.methodCallFromActivity();
+
                                     }
                                     team_last_receive++;
+
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception exception) {
+                                    //이미지를 storage 에서 불러오는데 실패한 경우
+                                }
+                            });
+                        }
+
+
+                    }       //onComplete end
+                });
+    }
+
+    // 나의 팀 목록 화면을 표현할 때 추가적인 데이터를 DB로 부터 받아올 때 사용하는 메소드다. 초대 목록에서 사용자가 초대 수락을 한 경우 호출된다.
+    public void GetAdditionalMyTeamData(){
+        System.out.println("GetAdditionalMyTeamData 호출됨");
+
+        //DB에서 갖고온 사용자의 팀이미지 url을 담는다
+        ArrayList<String> team_list_imgurl = new ArrayList<String>();
+
+        //DB에서 갖고온 사용자의 팀명을 담는다
+        ArrayList<String> team_list_name = new ArrayList<String>();
+
+        myteamArrayList = new ArrayList<>();;
+
+        db.collection("users3").document(currentUser.getEmail()).collection("team").get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        //사용자의 팀목록을 데이터를 불러오는데 성공하면 list 에 담는다
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                team_list_imgurl.add(document.getId());
+                                team_list_name.add(document.getString("team_name"));
+                            }
+                        }
+                        //데이터를 불러오는데 실패한 경우
+                        else {
+
+
+                        }
+
+                        for(int i=0;i<team_list_imgurl.size();i++){
+                            Myteam data;
+                            data = new Myteam("work","work","work");
+                            myteamArrayList.add(i,data);
+                        }
+
+
+                        // 사용자의 팀 목록을 리사이클러뷰로 표현해주는 코드
+                        for(int i=0;i<team_list_imgurl.size();i++){
+                            int finalI = i;
+                            //리사이클러뷰에 담을 아이템 객체 Myteam 을 생성할 때 리스트 안의 값을 바로 담으면 inner class 가 되서 에러가 뜬다. 그래서 임시로 이 변수를 사용.
+                            String tmp=team_list_name.get(i);
+                            StorageReference storageRef = storage.getReference();
+                            // 절차1-3.사용자들의 팀 정보를 표현하기 위해서 team_list_imgurl 에 담긴 uid 값을 바탕으로 FireBase storgae 에서 이미지를 불러온다.
+                            storageRef.child("team_profile/"+team_list_imgurl.get(i)+"/"+"team_profile.jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    Myteam data2;
+                                    data2 = new Myteam(tmp,uri.toString(),team_list_imgurl.get(finalI));
+
+                                    myteamArrayList.set(finalI,data2);
+
+                                    team.setTeam(myteamArrayList);
+
+                                    // 마지막으로 Storage 에서 데이터를 받아왔을 때 실행되는 조건문이다.
+                                    if(team_last_receive==team_list_imgurl.size()-1){
+                                        //transaction = fragmentManager.beginTransaction();
+                                        //transaction.replace(R.id.frameLayout, fragment_myteam).commitAllowingStateLoss();
+                                        bundle.putParcelable("my_team_list",team);
+                                        bundle.putString("team_exist","yes");
+                                        bundle.putString("user_Email",currentUser.getEmail());
+                                        fragment_myteam.setArguments(bundle);
+                                        dialog.dismiss();
+                                        additional_team_last_receive=0;
+                                    }
+                                    additional_team_last_receive++;
 
                                 }
                             }).addOnFailureListener(new OnFailureListener() {
@@ -603,14 +727,7 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
     }
 
 
-    @Override
-    public void onTimePickerSet(String a, String b) {
-        Log.v(TAG,"onTimePickerSet");
-        GetMyTeamFragent();
-        GetNotificationData();
-        Log.v(TAG,a);
-        Log.v(TAG,b);
-    }
+
 
     @Override
     protected void onResume() {
@@ -618,4 +735,24 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
 
 
     }
+
+    // 알림 프레그먼트 화면에서 메인액티비티로 데이터를 전달하기 위해 사용했다. 알림 프레그먼트가 MainActivity 에게 사용자가 팀 초대를 수락 받았다는 사실을 전달 해야하기 때문에 이 메소드가 존재한다.
+    @Override
+    public void InvitationAccepted(String a, String b) {
+        Log.v(TAG,"InvitationAccepted");
+        GetAdditionalMyTeamData();
+        GetAdditionalNotificationData();
+    }
+
+    // 알림 프레그먼트 화면에서 메인액티비티로 데이터를 전달하기 위해 사용했다. 알림 프레그먼트가 MainActivity 에게 리사이클러뷰를 새로고침 했다는 사실을 전달 하기 위해 이 메소드가 존재한다..
+    @Override
+    public void NotificationRefreshOccured() {
+        Log.v(TAG,"NotificationRefreshOccured");
+
+        GetAdditionalNotificationData();
+
+    }
+
+
+
 }

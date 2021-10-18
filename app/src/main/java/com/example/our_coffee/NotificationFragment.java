@@ -47,6 +47,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 public class NotificationFragment extends Fragment {
 
@@ -78,7 +79,13 @@ public class NotificationFragment extends Fragment {
     //RequestActivity에서 전달한 번들 저장
     Bundle bundle;
 
-    OnTimePickerSetListener onTimePickerSetListener;
+    // MainActivity 에 사용자가 초대를 수락받았다는 내용을 전달하기 위한 객체다.
+    InvitationAcceptedListener invitationAcceptedListener;
+
+    // MainActivity 에 사용자가 초대 목록을 새로고침 했다는 내용을 전달하기 위한 객체다.
+    NotificationRefreshListener notificationRefreshListener;
+
+    SwipeRefreshLayout swipeRefreshLayout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -92,6 +99,7 @@ public class NotificationFragment extends Fragment {
 
         //사용자가 팀을 추가하기위해 누르는 버튼
         RecyclerView my_notification=(RecyclerView)view.findViewById(R.id.my_notification);
+        swipeRefreshLayout=view.findViewById(R.id.swipe_fragment_list);
 
         //사용자의 팀 목록을 표현해주기 위한 리사이클러뷰다
         LinearLayoutManager mLinearLayoutManager = new LinearLayoutManager(getActivity());
@@ -120,17 +128,37 @@ public class NotificationFragment extends Fragment {
         }
 
 
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                myNotificationArrayList.clear();
+                notificationRefreshListener.NotificationRefreshOccured();
+                //Load_existing_user();
+                myNotificationAdapter.notifyDataSetChanged();
+                swipeRefreshLayout.setRefreshing(false);
+
+
+            }
+        });
+
+
     }       //onViewCreated end
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if(context instanceof OnTimePickerSetListener){
-            onTimePickerSetListener=(OnTimePickerSetListener)context;
+        if(context instanceof InvitationAcceptedListener){
+            invitationAcceptedListener=(InvitationAcceptedListener)context;
         }else{
-            throw new RuntimeException(context.toString()+"must implent OnTimePickerSetListener");
+            throw new RuntimeException(context.toString()+"must implent InvitationAcceptedListener");
         }
 
+        if(context instanceof NotificationRefreshListener){
+            notificationRefreshListener=(NotificationRefreshListener)context;
+        }else{
+            throw new RuntimeException(context.toString()+"must implent NotificationRefreshListener");
+        }
 
     }
 
@@ -185,7 +213,8 @@ public class NotificationFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        onTimePickerSetListener=null;
+        invitationAcceptedListener=null;
+        notificationRefreshListener=null;
     }
 
     public void DialogClick(int position) {
@@ -196,7 +225,8 @@ public class NotificationFragment extends Fragment {
             public void onClick(DialogInterface dialog, int which)
             {
 
-                onTimePickerSetListener.onTimePickerSet("되냐?", "된다");
+                invitationAcceptedListener.InvitationAccepted("되냐?", "된다");
+                
 
                 // 초대받을 팀의 pid 값.
                 String team_pid;
@@ -260,47 +290,69 @@ public class NotificationFragment extends Fragment {
         DocumentReference docRef=db.collection("users3").document(login_user);
         docRef.update("invited_team", FieldValue.arrayRemove(tmp));
 
-        //리사이클러뷰에서 현재 팀을 제거한다.
-        myNotificationAdapter.RemoveItem(position);
+        notificationRefreshListener.NotificationRefreshOccured();
+        Load_existing_user();
+        myNotificationAdapter.notifyDataSetChanged();
+
+//        //리사이클러뷰에서 현재 팀을 제거한다.
+//        myNotificationAdapter.RemoveItem(position);
     }
 
     // 알람 목록이 있는 사용자가 로그인한 경우 알람목록을 리사이클러뷰로 표현한다.
     public void Load_existing_user(){
-        System.out.println("로그 확인2");
+        Log.v(TAG,"Load_existing_user");
         notification = bundle.getParcelable("my_notification_list");
         login_user=bundle.getString("user_Email");
+            System.out.println(login_user);
+            System.out.println("되지 않을까?");
 
-        System.out.println(login_user);
-        System.out.println("되지 않을까?");
-        for(MyNotification myNotification:notification.getMyNotifications()){
-            String test = "팀명 " + myNotification.getTeam_name() + "  이미지url " + myNotification.getImage_url()+"  초대자 메일 "+myNotification.getInviter()+"    초대팀pid "+myNotification.getTeam_pid();
-            System.out.println(test);
+            for(MyNotification myNotification:notification.getMyNotifications()){
+                String test = "팀명 " + myNotification.getTeam_name() + "  이미지url " + myNotification.getImage_url()+"  초대자 메일 "+myNotification.getInviter()+"    초대팀pid "+myNotification.getTeam_pid();
+                System.out.println(test);
 
-            MyNotification data2;
+                MyNotification data2;
 
-            data2 = new MyNotification(myNotification.getTeam_name()+"로 부터 초대 알림이 왔어요!!",myNotification.getImage_url(),"초대자 : "+myNotification.getInviter(),myNotification.getTeam_pid());
+                data2 = new MyNotification(myNotification.getTeam_name()+"로 부터 초대 알림이 왔어요!!",myNotification.getImage_url(),"초대자 : "+myNotification.getInviter(),myNotification.getTeam_pid());
 
-            myNotificationArrayList.add(0,data2); // RecyclerView의 마지막 줄에 삽입
-            team_pid_list.add(0,myNotification.getTeam_pid());
-            team_name_list.add(0,myNotification.getTeam_name());
-            team_inviter_list.add(0,myNotification.getInviter());
-            myNotificationAdapter.notifyDataSetChanged();
-
-        }
-
-        myNotificationAdapter.setOnItemClickListener(new MyNotificationAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(MyNotificationAdapter.CustomViewHolder_MyNotification holder, View view, int position) {
-                DialogClick(position);
+                myNotificationArrayList.add(0,data2); // RecyclerView의 마지막 줄에 삽입
+                team_pid_list.add(0,myNotification.getTeam_pid());
+                team_name_list.add(0,myNotification.getTeam_name());
+                team_inviter_list.add(0,myNotification.getInviter());
+                myNotificationAdapter.notifyDataSetChanged();
 
             }
-        });
+
+            // 리사이클러뷰의 아이템 클릭시 실행됨
+            myNotificationAdapter.setOnItemClickListener(new MyNotificationAdapter.OnItemClickListener() {
+                @Override
+                public void onItemClick(MyNotificationAdapter.CustomViewHolder_MyNotification holder, View view, int position) {
+                    DialogClick(position);
+
+                }
+            });
+
+
+
+
+
     }
 
 
-    public interface  OnTimePickerSetListener{
-        void onTimePickerSet(String a,String b);
+    // 알림 프레그먼트 화면에서 메인액티비티로 데이터를 전달하기 위해 사용했다.
+    //알림 프레그먼트가 MainActivity 에게 사용자가 팀 초대를 수락 받았다는 사실을 전달 해야하기 때문에 이 인터페이스가 존재한다.
+    public interface  InvitationAcceptedListener{
+        void InvitationAccepted(String a,String b);
     }
 
+    // 알림 프레그먼트 화면에서 메인액티비티로 데이터를 전달하기 위해 사용했다.
+    //알림 프레그먼트가 MainActivity 에게 팀목록을 새로고침 했다는 사실을 전달 해야하기 때문에 이 인터페이스가 존재한다.
+    public interface  NotificationRefreshListener{
+        void NotificationRefreshOccured();
+    }
+
+
+    public void methodCallFromActivity(){
+        Log.i(TAG, "Method call directly from activity");
+    }
 
 }

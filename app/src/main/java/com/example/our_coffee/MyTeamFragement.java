@@ -123,8 +123,7 @@ public class MyTeamFragement extends Fragment {
                 i.putExtra("helloString", "helloString!!");
 
                 startActivityForResult(i, 1);
-//                Intent intent = new Intent(getContext(), Make_newteam.class);
-//                startActivity(intent);
+
             }
         });
 
