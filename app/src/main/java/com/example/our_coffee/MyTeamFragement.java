@@ -107,7 +107,7 @@ public class MyTeamFragement extends Fragment {
         bundle = getArguments();
         if(bundle!=null){
 
-            Load_existing_user();
+            Load_existing_team();
         }
 
 
@@ -132,7 +132,7 @@ public class MyTeamFragement extends Fragment {
             public void onRefresh() {
                 myteamArrayList.clear();
                 //ReloadMyTeam();
-                Load_existing_user();
+                Load_existing_team();
                 myTeamAdapter.notifyDataSetChanged();
                 swipeRefreshLayout.setRefreshing(false);
 
@@ -232,8 +232,8 @@ public class MyTeamFragement extends Fragment {
     }
 
     // 팀목록이 있는 사용자가 로그인한 경우 팀목록을 리사이클러뷰로 표현한다.
-    public void Load_existing_user(){
-        Log.v(TAG,"Load_existing_user 호출됨");
+    public void Load_existing_team(){
+        Log.v(TAG,"Load_existing_team 호출됨");
 
         // 현재 DB에 사용자에게 소속된 팀이 존재하는지 판단해주는 변수다. 있으면 yes, 없으면 no 가 저장된다.
         String team_exist;

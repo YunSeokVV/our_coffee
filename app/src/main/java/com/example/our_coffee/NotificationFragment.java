@@ -132,11 +132,11 @@ public class NotificationFragment extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                myNotificationArrayList.clear();
+                //myNotificationArrayList.clear();
                 notificationRefreshListener.NotificationRefreshOccured();
                 //Load_existing_user();
-                myNotificationAdapter.notifyDataSetChanged();
-                swipeRefreshLayout.setRefreshing(false);
+//                myNotificationAdapter.notifyDataSetChanged();
+//                swipeRefreshLayout.setRefreshing(false);
 
 
             }
@@ -279,6 +279,7 @@ public class NotificationFragment extends Fragment {
 
     //자신의 초대 목록에서 특정 초대를 제외하는 메소드.
     public void Delete_invitation(int position){
+        Log.v(TAG,"Delete_invitation");
         //DB에서 사용할 값을 잠시 저장하기 위한 변수
         String tmp;
         tmp=team_pid_list.get(position)+"_"+team_name_list.get(position)+"_"+team_inviter_list.get(position);
@@ -290,19 +291,31 @@ public class NotificationFragment extends Fragment {
         DocumentReference docRef=db.collection("users3").document(login_user);
         docRef.update("invited_team", FieldValue.arrayRemove(tmp));
 
-        notificationRefreshListener.NotificationRefreshOccured();
-        Load_existing_user();
+//        notificationRefreshListener.NotificationRefreshOccured();
+//        Load_existing_user();
         myNotificationAdapter.notifyDataSetChanged();
 
-//        //리사이클러뷰에서 현재 팀을 제거한다.
-//        myNotificationAdapter.RemoveItem(position);
+        //리사이클러뷰에서 현재 팀을 제거한다.
+        myNotificationAdapter.RemoveItem(position);
     }
 
     // 알람 목록이 있는 사용자가 로그인한 경우 알람목록을 리사이클러뷰로 표현한다.
     public void Load_existing_user(){
         Log.v(TAG,"Load_existing_user");
-        notification = bundle.getParcelable("my_notification_list");
-        login_user=bundle.getString("user_Email");
+
+        // 현태 알림 목록에 데이터가 존재하는지 표현해주는 변수
+        String notify_exist=bundle.getString("notification_exist");
+
+        // 사용자의 초대목록에 아무런 데이터가 없는 경우
+        if(notify_exist.equals("no")){
+            Log.v(TAG,"알림 데이터 x");
+        }
+
+        // 사용자의 초대목록에 데이터가 있는 경우
+        else if(notify_exist.equals("yes")){
+            Log.v(TAG,"알림 데이터 O");
+            notification = bundle.getParcelable("my_notification_list");
+            login_user=bundle.getString("user_Email");
             System.out.println(login_user);
             System.out.println("되지 않을까?");
 
@@ -330,6 +343,9 @@ public class NotificationFragment extends Fragment {
 
                 }
             });
+        }
+
+
 
 
 
