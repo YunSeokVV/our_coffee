@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.Window;
 
 
+import com.bumptech.glide.Glide;
 import com.example.our_coffee.Utils.MyNotification;
 import com.example.our_coffee.Utils.Myteam;
 import com.example.our_coffee.Utils.Notification;
@@ -47,7 +48,7 @@ import java.util.Map;
 
 
 
-public class MainActivity extends AppCompatActivity implements NotificationFragment.InvitationAcceptedListener,NotificationFragment.NotificationRefreshListener{
+public class MainActivity extends AppCompatActivity implements NotificationFragment.InvitationAcceptedListener,NotificationFragment.NotificationRefreshListener,MyPageFragment.UserProfileChanged{
 
 
 
@@ -132,8 +133,8 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
 
         Download_dialog();
 
+        GetMyPageData();
 
-        GetNotificationData();
 
 
 
@@ -543,7 +544,7 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
         //DB에서 갖고온 사용자의 팀명을 담는다
         ArrayList<String> team_list_name = new ArrayList<String>();
 
-        myteamArrayList = new ArrayList<>();;
+        myteamArrayList = new ArrayList<>();
 
         db.collection("users3").document(currentUser.getEmail()).collection("team").get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -617,16 +618,6 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
                                         fragment_myteam.setArguments(bundle);
                                         dialog.dismiss();
                                         team_last_receive=0;
-
-
-//                                        transaction=fragmentManager.beginTransaction();
-//                                        getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout,fragment_notification,"NoticifationFragemnt").commit();
-//
-//                                        getSupportFragmentManager().executePendingTransactions();
-//                                        FragmentManager fm = getSupportFragmentManager();
-//                                        NotificationFragment fragment = (NotificationFragment)fm.findFragmentByTag("NoticifationFragemnt");
-//                                        Log.v(TAG,"sdf "+(NotificationFragment)fm.findFragmentByTag("NoticifationFragemnt"));
-//                                        fragment.methodCallFromActivity();
 
                                     }
                                     team_last_receive++;
@@ -762,10 +753,13 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
 
         }
 
+        else if(data.getStringExtra("reload")==null && data.getStringExtra("team_pid")==null && data.getStringExtra("team_name")==null){
+            Log.v(TAG,"상황2");
+        }
         // Make_newteam 액티비티에서 새로운 팀을 생성하고 나면 팀목록을 표현하는 리사이클러뷰에 새로 추가된 팀을 추가한다.
         //원래는 resultCode 를 임의로 설정해서 이 상황을 처리하려고 했지만 어째서인지 갑자기 되지 않는다.
         else{
-            Log.v(TAG,"상황2");
+            Log.v(TAG,"상황3");
             String reload="nothing";
             String team_pid;
             String team_name;
@@ -848,6 +842,114 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
         }
     }
 
+    // 앱이 처음 실행 됐을 때 마이페이지에 필요한 데이터를 DB에서 불러온다.
+    public void GetMyPageData(){
+        Log.v(TAG,"GetMyPageData 호출");
+        StorageReference storageRef = storage.getReference();
+        storageRef.child("user_profile/"+currentUser.getEmail()+"_profile.jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Log.v(TAG,"uri "+uri.toString());
+                bundle.putString("image_uri",uri.toString());
+                //사용자가 이전에 설정한 자신의 정보들을 DB에서 불러온다.
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                DocumentReference docRef=db.collection("users3").document(currentUser.getEmail());
+                docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+
+                                bundle.putString("user_nick_name",document.get("nick_name").toString());
+                                bundle.putString("user_frequently_coffee",document.get("my_coffee").toString());
+                                bundle.putString("user_coffee_detail_option",document.get("my_coffee_option").toString());
+                                fragment_mypage.setArguments(bundle);
+                                Log.v(TAG,"GetMyPageData 끝");
+                                GetNotificationData();
+                            } else {
+                            }
+                        } else {
+                        }
+                    }
+                });
+
+                //Glide.with(getContext()).load(uri).into(team_profile_url);
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                Log.v(TAG,"onFailure occured");
+
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                DocumentReference docRef=db.collection("users3").document(currentUser.getEmail());
+                docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+
+                                bundle.putString("user_nick_name",document.get("nick_name").toString());
+                                bundle.putString("user_frequently_coffee",document.get("my_coffee").toString());
+                                bundle.putString("user_coffee_detail_option",document.get("my_coffee_option").toString());
+                                fragment_mypage.setArguments(bundle);
+                                Log.v(TAG,"GetMyPageData 끝");
+                                GetNotificationData();
+                            } else {
+                            }
+                        } else {
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    // 마이페이지에서 업데이트 된 데이터들을 새로 DB에서 불러온다.
+    public void UpdateMyPageData(){
+        Log.v(TAG,"UpdateMyPageData 호출");
+        StorageReference storageRef = storage.getReference();
+        storageRef.child("user_profile/"+currentUser.getEmail()+"_profile.jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Log.v(TAG,"uri "+uri.toString());
+                bundle.putString("image_uri",uri.toString());
+                //사용자가 이전에 설정한 자신의 정보들을 DB에서 불러온다.
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                DocumentReference docRef=db.collection("users3").document(currentUser.getEmail());
+                docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                bundle.putString("user_nick_name",document.get("nick_name").toString());
+                                bundle.putString("user_frequently_coffee",document.get("my_coffee").toString());
+                                bundle.putString("user_coffee_detail_option",document.get("my_coffee_option").toString());
+                                fragment_mypage.setArguments(bundle);
+                                Log.v(TAG,"UpdateMyPageData 끝");
+                                UseMyPageFragmentFunction().dialog.dismiss();
+                            } else {
+                            }
+                        } else {
+                        }
+                    }
+                });
+
+                //Glide.with(getContext()).load(uri).into(team_profile_url);
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+
+            }
+        });
+    }
 
 
 
@@ -878,6 +980,15 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
 
     }
 
+    // 마이페이지 프레그먼트 화면에서 메인액티비티로 데이터를 전달하기 위해 사용했다.
+    //마이페이지 프레그먼트가 MainActivity 에게 프로필 정보를 수정했다는 사실을 알리기 위해서 이 인터페이스를 사용했다.
+    @Override
+    public void UserProfileChanged() {
+        Log.v(TAG,"UserProfileChanged");
+        UpdateMyPageData();
+        UseMyPageFragmentFunction().dialog.dismiss();
+    }
+
     // Notification 에 있는 메소드를 엑티비티에서 사용하기위해 만든 메소드다.
     public NotificationFragment UseMyTeamFragmentFunction(){
 
@@ -886,6 +997,18 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
         getSupportFragmentManager().executePendingTransactions();
         FragmentManager fm=getSupportFragmentManager();
         NotificationFragment fragment=(NotificationFragment)fm.findFragmentByTag("NoticifationFragemnt");
+
+        return fragment;
+    }
+
+    // Notification 에 있는 메소드를 엑티비티에서 사용하기위해 만든 메소드다.
+    public MyPageFragment UseMyPageFragmentFunction(){
+
+        transaction=fragmentManager.beginTransaction();
+        getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout,fragment_mypage,"MyPageFragment").commit();
+        getSupportFragmentManager().executePendingTransactions();
+        FragmentManager fm=getSupportFragmentManager();
+        MyPageFragment fragment=(MyPageFragment)fm.findFragmentByTag("MyPageFragment");
 
         return fragment;
     }

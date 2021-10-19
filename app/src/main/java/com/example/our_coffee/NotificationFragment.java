@@ -367,8 +367,6 @@ public class NotificationFragment extends Fragment {
     }
 
 
-    public void methodCallFromActivity(){
-        Log.i(TAG, "Method call directly from activity");
-    }
+
 
 }
