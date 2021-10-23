@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import android.app.Activity;
@@ -50,6 +52,9 @@ public class Make_newteam extends AppCompatActivity {
 
     public static String TAG="Make_newteam";
 
+    // 팀을 생성하고 그 사실을 프레그먼트에 알리기 위한 객체.
+    private MyTeamFragement fragment_myteam;
+
     //FireBase 에 이미지를 저장하기위해 선언한 인스턴스
     FirebaseStorage storage = FirebaseStorage.getInstance();
 
@@ -74,12 +79,20 @@ public class Make_newteam extends AppCompatActivity {
     // DB에서 필요한 데이터를 추가하기 전까지 화면에 다운중이라는 사실을 알려주기 위환 dialog 다.
     ProgressDialog dialog;
 
+    // 팀 목록에 데이터가 없는 사용자가 만약 팀을 생성하면 팀이 생긴다. 이 사실을 MyTeamFragment 에 알려야 하기 때문에 bundle 객체 사용.
+    Bundle bundle;
+
+    FragmentTransaction transaction;
+    FragmentManager fragmentManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_make_newteam);
 
+        bundle=new Bundle();
+        fragment_myteam = new MyTeamFragement();
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         toolbar.setTitle("나의 팀 이름");
@@ -135,9 +148,6 @@ public class Make_newteam extends AppCompatActivity {
                                     DocumentReference doc=db.collection("team3").document(team_pid);
                                     doc.update("team_member_name", FieldValue.arrayUnion(currentUser.getEmail()));
 
-
-
-                                    //check point
                                 }})
                                     .addOnFailureListener(new OnFailureListener() {
                                         @Override
@@ -225,8 +235,13 @@ public class Make_newteam extends AppCompatActivity {
                 returnIntent.putExtra("reload", "reload_data");
                 returnIntent.putExtra("team_pid", team_pid);
                 returnIntent.putExtra("team_name", team_name.getText().toString());
+
+                //MainActivity 에 사용자가 새로운 팀을 생성했다는 사실을 알려준다.
                 setResult(3135678,returnIntent);
-                setResult(RESULT_OK,returnIntent);
+                //setResult(RESULT_OK,returnIntent);
+                //bundle.putString("team_exist","yes");
+                //fragment_myteam.setArguments(bundle);
+                //UseMyTeamFragmentFunction().team_exist="yes";
                 finish();
                 dialog.dismiss();
                 Toast myToast = Toast.makeText(Make_newteam.this,"팀 생성을 완료했습니다! 새로운 팀원들을 초대해보세요 :)", Toast.LENGTH_SHORT);
@@ -255,5 +270,20 @@ public class Make_newteam extends AppCompatActivity {
         setResult(RESULT_OK,returnIntent);
         finish();
     }
+
+
+    // MyTeamFragment 에 있는 변수, 메소드를 엑티비티에서 사용하기위해 만든 메소드다.
+    public MyTeamFragement UseMyTeamFragmentFunction(){
+        transaction=fragmentManager.beginTransaction();
+        //transaction.replace(R.id.frameLayout, fragment_notification,"NoticifationFragemnt").commitAllowingStateLoss();
+        getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout,fragment_myteam,"MyTeamFragement").commit();
+        getSupportFragmentManager().executePendingTransactions();
+        FragmentManager fm=getSupportFragmentManager();
+        MyTeamFragement fragment=(MyTeamFragement)fm.findFragmentByTag("MyTeamFragement");
+
+        return fragment;
+    }
+
+
 
 }

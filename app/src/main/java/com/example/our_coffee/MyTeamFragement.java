@@ -50,8 +50,8 @@ public class MyTeamFragement extends Fragment {
     FirebaseUser currentUser;
 
     //리사이클러뷰 관련 코드
-    private ArrayList<Myteam> myteamArrayList;
-    private MyTeamAdapter myTeamAdapter;
+    ArrayList<Myteam> myteamArrayList;
+    MyTeamAdapter myTeamAdapter;
 
     Team team;
     Bundle bundle;
@@ -63,6 +63,8 @@ public class MyTeamFragement extends Fragment {
     SwipeRefreshLayout swipeRefreshLayout;
     RecyclerView my_team;
 
+    //팀목록 프레그먼트가 MainActivity 에게 사용자가 새로고침을 했다는 사실을 전달 해야하기 때문에 이 객체가 존재한다.
+    MyTeamRefresh myTeamRefresh;
     @Override
     //Called to have the fragment instantiate(예시하다) its user interface view. This is optional, and non-graphical fragments can return null.
     public View onCreateView(LayoutInflater inflater,
@@ -130,11 +132,12 @@ public class MyTeamFragement extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                myteamArrayList.clear();
-                //ReloadMyTeam();
-                Load_existing_team();
-                myTeamAdapter.notifyDataSetChanged();
-                swipeRefreshLayout.setRefreshing(false);
+//                myteamArrayList.clear();
+//                //ReloadMyTeam();
+//                Load_existing_team();
+//                myTeamAdapter.notifyDataSetChanged();
+//                swipeRefreshLayout.setRefreshing(false);
+                myTeamRefresh.RefreshMyTeam();
 
 
             }
@@ -143,9 +146,16 @@ public class MyTeamFragement extends Fragment {
     }       //onViewCreated end
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        Log.d("MyTeamFragment", "onAttach");
+    public void onAttach(Activity context) {
+        super.onAttach(context);
+        Log.d(TAG, "onAttach");
+
+        if(context instanceof MyTeamRefresh){
+            myTeamRefresh=(MyTeamRefresh)context;
+        }else{
+            throw new RuntimeException(context.toString()+"must implent myTeamRefresh");
+        }
+
     }
 
     @Override
@@ -200,15 +210,19 @@ public class MyTeamFragement extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        Log.d("MyTeamFragment", "onDetach");
+        Log.d(TAG, "onDetach");
+
+        myTeamRefresh=null;
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Log.v("MyTeamFragment","onActivityResult called");
+        Log.v("MyTeamFragment","requestCode"+requestCode);
+        Log.v("MyTeamFragment","resultCode"+resultCode);
         getActivity();
-        if(requestCode == 1 && resultCode == Activity.RESULT_OK) {
+        if(requestCode == 1 && resultCode == 3135678) {
             //some code
             Log.v("MyTeamFragment",data.getStringExtra("reload"));
 
@@ -234,6 +248,8 @@ public class MyTeamFragement extends Fragment {
     // 팀목록이 있는 사용자가 로그인한 경우 팀목록을 리사이클러뷰로 표현한다.
     public void Load_existing_team(){
         Log.v(TAG,"Load_existing_team 호출됨");
+
+        myteamArrayList.clear();
 
         // 현재 DB에 사용자에게 소속된 팀이 존재하는지 판단해주는 변수다. 있으면 yes, 없으면 no 가 저장된다.
         String team_exist;
@@ -396,5 +412,10 @@ public class MyTeamFragement extends Fragment {
 
     }
 
+    // 팀목록 프레그먼트 화면에서 메인액티비티로 데이터를 전달하기 위해 사용했다.
+    //팀목록 프레그먼트가 MainActivity 에게 사용자가 새로고침을 했다는 사실을 전달 해야하기 때문에 이 인터페이스가 존재한다.
+    public interface  MyTeamRefresh{
+        void RefreshMyTeam();
+    }
 
 }

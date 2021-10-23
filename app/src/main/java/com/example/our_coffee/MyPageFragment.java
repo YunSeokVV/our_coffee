@@ -226,7 +226,7 @@ public class MyPageFragment extends Fragment {
                         @Override
                         public void onSuccess(Void aVoid) {
                             // 만약 사용자가 자신의 커피 옵션을 변경했다면 DB에 수정된 내용을 반영한다.
-                            db.collection("users3").document(currentUser.getEmail()).update("coffee_detail_option",coffee_detail_option.getText().toString()).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            db.collection("users3").document(currentUser.getEmail()).update("my_coffee_option",coffee_detail_option.getText().toString()).addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                     // 사용자가 자신의 프로필 사진을 변경하지 않은 경우
@@ -360,7 +360,7 @@ public class MyPageFragment extends Fragment {
     @Override
     //주의 : onActivityResult 는 Framgent 클래스에서 deprecated 됐지만 여전히 사용되는 메소드다. 일단 참고.
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        System.out.println("onActivityResult 로그");
+        Log.v(TAG,"onActivityResult 로그");
 
 
         super.onActivityResult(requestCode, resultCode, data);
