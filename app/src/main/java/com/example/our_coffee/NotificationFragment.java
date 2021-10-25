@@ -110,9 +110,6 @@ public class NotificationFragment extends Fragment {
         myNotificationArrayList = new ArrayList<>();
         myNotificationAdapter = new MyNotificationAdapter(myNotificationArrayList,getContext());
         my_notification.setAdapter(myNotificationAdapter);
-        myNotificationArrayList = new ArrayList<>();
-        myNotificationAdapter = new MyNotificationAdapter(myNotificationArrayList,getContext());
-        my_notification.setAdapter(myNotificationAdapter);
 
         //아래 두 코드는 리사이클러뷰의 아이템 간격을 조절해주는 코드다.
         RecyclerDecoration_Height decoration_height = new RecyclerDecoration_Height(60);

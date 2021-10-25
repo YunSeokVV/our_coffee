@@ -2,7 +2,7 @@ package com.example.our_coffee.Utils;
 // 자신의 팀원들을 립사이클러뷰로 표현하기위한 클래스다
 public class MyteamMember {
     // 자신의 팀원의 이름을 표현하는 변수다
-    String team_name;
+    String member_name;
 
     // 팀원들의 프로필 사진을 표현하는 이미지url 을 표현하는 변수다
     String image_url;
@@ -13,12 +13,12 @@ public class MyteamMember {
     // 팀원의 커피 추가 옵션을 표현한기위한 변수다
     String coffee_option;
 
-    public String getTeam_name() {
-        return team_name;
+    public String getMember_name() {
+        return member_name;
     }
 
-    public void setTeam_name(String team_name) {
-        this.team_name = team_name;
+    public void setMember_name(String member_name) {
+        this.member_name = member_name;
     }
 
     public String getImage_url() {
@@ -45,8 +45,8 @@ public class MyteamMember {
         this.coffee_option = coffee_option;
     }
 
-    public MyteamMember(String team_name, String image_url, String coffee_menu, String coffee_option) {
-        this.team_name = team_name;
+    public MyteamMember(String member_name, String image_url, String coffee_menu, String coffee_option) {
+        this.member_name = member_name;
         this.image_url = image_url;
         this.coffee_menu = coffee_menu;
         this.coffee_option = coffee_option;
