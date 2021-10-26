@@ -6,13 +6,17 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 
 import com.example.our_coffee.Utils.MyNotificationAdapter;
 import com.example.our_coffee.Utils.MyTeamMemberAdapter;
@@ -20,15 +24,22 @@ import com.example.our_coffee.Utils.Myteam;
 import com.example.our_coffee.Utils.MyteamMember;
 import com.example.our_coffee.Utils.RecyclerDecoration_Height;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class Team_member extends AppCompatActivity {
@@ -48,6 +59,12 @@ public class Team_member extends AppCompatActivity {
     //팀원들의 목록을 보여주기 위한 리사이클러뷰다.
     RecyclerView my_team_member;
 
+    // 팀원들이 원하는 음료를 정리해서 볼 수 있다.
+    Button show_organized;
+
+    // DB에서 필요한 데이터를 다운받기 전까지 화면에 다운중이라는 사실을 알려주기 위환 dialog 다.
+    ProgressDialog dialog;
+
     FirebaseFirestore db;
 
     //DB에서 갖고온 팀원들의 이메일을 담는다
@@ -61,6 +78,12 @@ public class Team_member extends AppCompatActivity {
 
     //DB에서 갖고온 팀원들의 닉네임을 담는다
     List<String> member_nick_name = new ArrayList<String>();;
+
+    //DB에서 갖고온 커피메뉴 데이터를 담는다
+    List<String> coffee_menu_list=new ArrayList<>();
+
+    //각 커피의 종류별로 몇개나 사람들이 원하는지 표현해주는 리스트다.
+    List<Integer> coffee_number = new ArrayList<Integer>();
 
 
     // 현재 화면에서 표현하고 있는 팀의 고유 pid 값이다
@@ -78,6 +101,7 @@ public class Team_member extends AppCompatActivity {
 
         my_team_member=findViewById(R.id.my_team_member);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
+        show_organized=(Button)findViewById(R.id.button);
 
         //사용자의 팀원 목록을 표현해주기 위한 리사이클러뷰다
         LinearLayoutManager mLinearLayoutManager = new LinearLayoutManager(getApplicationContext());
@@ -113,7 +137,17 @@ public class Team_member extends AppCompatActivity {
         // 팀안의 모든 유저들의 이메일 정보를 DB에서 불러온다.
         db = FirebaseFirestore.getInstance();
 
+        Download_dialog("데이터 확인중");
         LoadUsersData();
+
+        show_organized.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.v(TAG,"버튼 클릭함");
+            }
+        });
+
+
 
     }       //onCreate end
 
@@ -201,6 +235,10 @@ public class Team_member extends AppCompatActivity {
                                             member_coffee_option.add(String.valueOf(document.get("my_coffee_option")));
                                             member_nick_name.add(String.valueOf(document.get("nick_name")));
 
+                                            MyteamMember data;
+                                            data = new MyteamMember(String.valueOf(document.get("nick_name")),"work",String.valueOf(document.get("my_coffee")),String.valueOf(document.get("my_coffee_option")));
+                                            team_memberArrayList.set(finalI,data);
+
                                             //DB 에서 데이터를 마지막으로 받아온 상황이다.
                                             if(last[0] ==team_member_email.size()-1){
                                                 Log.v(TAG,"마지막으로 데이터를 받아옴");
@@ -211,12 +249,14 @@ public class Team_member extends AppCompatActivity {
                                                     Log.v(TAG,member_nick_name.get(i));
                                                 }
 
+
                                                 ShowMemberRecyclerView();
                                                 last[0] =0;
                                             }
                                             last[0]++;
 
-                                            //todo : 일단 팀원들을 리사이클러뷰로 표현하는 것은 후순위로 미룬다. 우선 팀원들을 초대하는 기능부터 구현하겠다.
+
+
 
 
                                         }
@@ -252,43 +292,99 @@ public class Team_member extends AppCompatActivity {
     public void ShowMemberRecyclerView(){
         Log.v(TAG,"ShowMemberRecyclerView");
 
-//        // 사용자의 팀 목록을 리사이클러뷰로 표현해주는 코드
-//        for(int i=0;i<team_member_coffee.size();i++){
-//
-//            int finalI = i;
-//            //팀명을 표현하는 변수다.
-//            String tmp=team_list_name.get(i);
-//            StorageReference storageRef = storage.getReference();
-//
-//            Log.v(TAG,"check-data");
-//            Log.v(TAG,"team_list_pid.get(i) "+team_list_pid.get(i));
-//            Log.v(TAG,"tmp "+tmp);
-//
-//
-//            storageRef.child("team_profile/"+team_list_pid.get(i)+"/"+"team_profile.jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-//                @Override
-//                public void onSuccess(Uri uri) {
-//                    Myteam data2;
-//                    data2 = new Myteam(tmp,uri.toString(),team_list_pid.get(finalI));
-//                    //myteamArrayList.add(0,data2);
-//                    myteamArrayList.set(finalI,data2);
-//
-//                    if(team_list_pid.size()==myteamArrayList.size()){
-//                        //Collections.reverse(myteamArrayList);
-//                        //아래 두 코드는 리사이클러뷰의 아이템 간격을 조절해주는 코드다.
-//                        myTeamAdapter.notifyDataSetChanged();
-//                        swipeRefreshLayout.setRefreshing(false);
-//                    }
-//
-//                }
-//
-//            }).addOnFailureListener(new OnFailureListener() {
-//                @Override
-//                public void onFailure(@NonNull Exception exception) {
-//                    //이미지를 storage 에서 불러오는데 실패한 경우
-//                    Log.v(TAG,"excetion "+exception);
-//                }
-//            });
-//        }
+        //현재 팀의 팀원들을 리사이클러뷰로 표현해주는 코드다.
+        for(int i=0;i<team_member_coffee.size();i++){
+            Log.v(TAG,"반복문이 실행 되었습니다. "+i);
+            Log.v(TAG,team_member_email.get(i));
+
+            int finalI = i;
+            FirebaseStorage storage = FirebaseStorage.getInstance();
+            StorageReference storageRef = storage.getReference();
+
+            storageRef.child("user_profile/"+team_member_email.get(i)+"_profile.jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                @Override
+                public void onSuccess(Uri uri) {
+                    Log.v(TAG,"team_member_email.get(i) "+team_member_email.get(finalI));
+                    Log.v(TAG,"데이터 받아오기 성공 "+finalI);
+                    Log.v(TAG,"member_nick_name "+member_nick_name.get(finalI));
+                    Log.v(TAG,"uri.toString "+uri.toString());
+                    Log.v(TAG,"음료 "+team_member_coffee.get(finalI));
+                    Log.v(TAG,"옵션 "+member_coffee_option.get(finalI));
+
+                    team_memberArrayList.get(finalI).setImage_url(uri.toString());
+                    myTeamMemberAdapter.notifyDataSetChanged();
+
+                    // 마지막으로 DB에서 데이터를 받아왔을 때 실행되는 조건문.
+                    if(finalI==team_member_coffee.size()-1){
+                        Log.v(TAG,"마지막 반복문이 실행되었습니다.");
+                        //Collections.reverse(myteamArrayList);
+                        //아래 두 코드는 리사이클러뷰의 아이템 간격을 조절해주는 코드다.
+                        myTeamMemberAdapter.notifyDataSetChanged();
+
+                        LoadCoffeeMenu();
+                    }
+
+                }
+
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    //이미지를 storage 에서 불러오는데 실패한 경우
+                    Log.v(TAG,"excetion log "+exception);
+
+                }
+            });
+        }
     }
+
+    // DB에 저장되어 있는 커피 메뉴를 불러오는 메소드다. 팀원들이 어떤 음료 메뉴를 몇개나 선택했는지 확인헐 때 사용한다.
+    public void LoadCoffeeMenu(){
+        Log.v(TAG,"LoadCoffeeMenu");
+        db.collection("coffee_menu3").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.v(TAG, document.getId() + " => " + document.getData());
+                                Log.v(TAG, document.getId() + " => " + document.get("menu_name"));
+                                coffee_menu_list.add(String.valueOf(document.get("menu_name")));
+                            }
+
+                            CountMenu();
+                            dialog.dismiss();
+
+                        }
+
+                        else {
+                            Log.v(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+    }
+
+    // 팀원들이 어떤 음료를 몇개나 원하는지 세는 역할을 하는 메소드다. '우리팀 음료 모아 보기' 기능을 통해서 구매 해야하는 커피들의 개수를 보기 편하게 Dialog로 표현한다.
+    public void CountMenu(){
+        Log.v(TAG,"CountMenu");
+
+        for(int i=0;i<coffee_menu_list.size();i++){
+            coffee_number.add(i,Collections.frequency(team_member_coffee, coffee_menu_list.get(i)));
+        }
+
+        // 사람들이 고른 음료들의 개수를 로그로 확인
+        for(int i=0;i<coffee_number.size();i++){
+            Log.v(TAG,"coffee_number "+coffee_number.get(i));
+            Log.v(TAG,"coffee_menu_list "+coffee_menu_list.get(i));
+        }
+
+    }
+
+    // 화면에 필요한 정보들을 보여주기 위해서 DB에서 데이터를 받아올 때 까지 로딩중이라는 사실을 알려주는 다이얼로그 메소드다.
+    public void Download_dialog(String showing_text){
+        dialog = new ProgressDialog(Team_member.this);
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setMessage(showing_text);
+        dialog.setCancelable(false);
+        dialog.show();
+    }
+
 }
