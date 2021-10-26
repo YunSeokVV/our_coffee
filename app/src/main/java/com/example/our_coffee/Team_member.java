@@ -6,6 +6,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
@@ -18,7 +19,10 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 
+import com.example.our_coffee.Utils.GatherTeam;
+import com.example.our_coffee.Utils.GatherTeamAdapter;
 import com.example.our_coffee.Utils.MyNotificationAdapter;
+import com.example.our_coffee.Utils.MyTeamAdapter;
 import com.example.our_coffee.Utils.MyTeamMemberAdapter;
 import com.example.our_coffee.Utils.Myteam;
 import com.example.our_coffee.Utils.MyteamMember;
@@ -64,6 +68,9 @@ public class Team_member extends AppCompatActivity {
 
     // DB에서 필요한 데이터를 다운받기 전까지 화면에 다운중이라는 사실을 알려주기 위환 dialog 다.
     ProgressDialog dialog;
+
+    // 사용자들의 음료를 모아봐서 보기 편하게 해줄 떄 사용하는 다이얼로그 창이다.
+    Dialog gather_drink;
 
     FirebaseFirestore db;
 
@@ -124,6 +131,11 @@ public class Team_member extends AppCompatActivity {
         //툴바의 뒤로가기 버튼을 활성화 한다
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        // 다이얼로그에 대한 설정을 해준다.
+        gather_drink=new Dialog(Team_member.this);
+        gather_drink.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        gather_drink.setContentView(R.layout.gather_menu_dialog);
+
         Intent intent = getIntent(); /*데이터 수신*/
         team_pid = intent.getExtras().getString("team_pid"); /*String형*/
         team_name = intent.getExtras().getString("team_name");
@@ -144,6 +156,7 @@ public class Team_member extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Log.v(TAG,"버튼 클릭함");
+                ShowGatherDrinkDialog(coffee_number,coffee_menu_list);
             }
         });
 
@@ -385,6 +398,34 @@ public class Team_member extends AppCompatActivity {
         dialog.setMessage(showing_text);
         dialog.setCancelable(false);
         dialog.show();
+    }
+
+    // 팀의 음료를 모아서 보여주기 위한 다이얼로그를 실행한다.
+    public void ShowGatherDrinkDialog(List<Integer> coffee_number,List<String> coffee_menu_list){
+        gather_drink.show();
+
+        //리사이클러뷰 관련 코드
+        ArrayList<GatherTeam> gatherTeamArrayList=new ArrayList<>();
+        GatherTeamAdapter gatherTeamAdapter;
+        gatherTeamAdapter = new GatherTeamAdapter(gatherTeamArrayList,getApplicationContext());
+
+        RecyclerView item=gather_drink.findViewById(R.id.recyclerview);
+        LinearLayoutManager mLinearLayoutManager = new LinearLayoutManager(this);
+        item.setLayoutManager(mLinearLayoutManager);
+        item.setAdapter(gatherTeamAdapter);
+
+        //아래 두 코드는 리사이클러뷰의 아이템 간격을 조절해주는 코드다.
+        RecyclerDecoration_Height decoration_height = new RecyclerDecoration_Height(60);
+        item.addItemDecoration(decoration_height);
+
+        GatherTeam data;
+
+        for(int i=0;i<coffee_number.size();i++){
+            data=new GatherTeam(coffee_menu_list.get(i)+" : "+coffee_number.get(i)+"명");
+            gatherTeamArrayList.add(0,data);
+        }
+        gatherTeamAdapter.notifyDataSetChanged();
+
     }
 
 }
