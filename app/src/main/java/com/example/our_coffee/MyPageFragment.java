@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.our_coffee.Utils.SelectCoffeeActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -144,54 +145,16 @@ public class MyPageFragment extends Fragment {
             coffee_detail_option.setText(user_coffee_detail_option);
         }
 
+        frequently_coffee.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Log.v(TAG,"닉네임 변경");
+
+                Intent intent = new Intent(getContext(), SelectCoffeeActivity.class);
+                startActivity(intent);
+            }
+        });
 
 
-
-//        //사용자가 자신의 프로필 사진을 DB에서 불러오기 위한 코드다.
-//        StorageReference storageRef = storage.getReference();
-//        storageRef.child("user_profile/"+currentUser.getEmail()+"_profile.jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-//            @Override
-//            public void onSuccess(Uri uri) {
-//                System.out.println("check-data onSuccess");
-//                System.out.println(uri.toString());
-//
-//                Glide.with(getContext()).load(uri).into(team_profile_url);
-//
-//            }
-//        }).addOnFailureListener(new OnFailureListener() {
-//            @Override
-//            public void onFailure(@NonNull Exception exception) {
-//                System.out.println("check-data onFailure");
-//                System.out.println(exception.toString());
-//
-//
-//            }
-//        });
-//
-//        //사용자가 이전에 설정한 자신의 정보들을 DB에서 불러온다.
-//        FirebaseFirestore db = FirebaseFirestore.getInstance();
-//        DocumentReference docRef=db.collection("users3").document(currentUser.getEmail());
-//        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-//            @Override
-//            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-//                if (task.isSuccessful()) {
-//
-//                    DocumentSnapshot document = task.getResult();
-//                    if (document.exists()) {
-//                        user_nick_name=document.get("nick_name").toString();
-//                        user_frequently_coffee=document.get("my_coffee").toString();
-//                        user_coffee_detail_option=document.get("my_coffee_option").toString();
-//
-//                        nick_name.setText(user_nick_name);
-//                        frequently_coffee.setText(user_frequently_coffee);
-//                        coffee_detail_option.setText(user_coffee_detail_option);
-//
-//                    } else {
-//                    }
-//                } else {
-//                }
-//            }
-//        });
 
         //사용자가 자신의 팀 프로필 사진을 설정한다
         team_profile_url.setOnClickListener(new View.OnClickListener() {
