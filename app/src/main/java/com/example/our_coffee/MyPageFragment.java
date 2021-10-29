@@ -1,6 +1,5 @@
 package com.example.our_coffee;
 // 마이페이지를 표현한 Fragmnet 이다. 마이페이지 기능이 작동하기 위해서는 Figma 에서 적었던 기획서를 확인하면 된다.
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -14,18 +13,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.example.our_coffee.Utils.SelectCoffeeActivity;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -71,8 +66,10 @@ public class MyPageFragment extends Fragment {
 
     CircleImageView team_profile_url;
     Button save_btn;
-    EditText coffee_detail_option;
-    EditText frequently_coffee;
+    //EditText coffee_detail_option;
+    TextView frequently_coffee;
+    //변경하기 버튼을 표현하는 TextView다. 눌러서 변경하는 화면으로 전환.
+    TextView change_coffee;
     EditText nick_name;
 
     // DB에서 사용자의 정보를 업데이트 하기 전까지 dialog 수행.
@@ -117,13 +114,14 @@ public class MyPageFragment extends Fragment {
         //사용자가 자신의 닉네임을 설정할 수 있다.
         nick_name=(EditText) view.findViewById(R.id.nick_name);
         //사용자가 자신이 자주 먹는 커피를 표현하는 EditText 다.
-        frequently_coffee=(EditText) view.findViewById(R.id.frequently_coffee);
+        frequently_coffee=(TextView) view.findViewById(R.id.frequently_coffee);
         //사용자가 커피를 살때 커피 옵션을 설정한다.
-        coffee_detail_option=(EditText) view.findViewById(R.id.coffee_detail_option);
+        //coffee_detail_option=(EditText) view.findViewById(R.id.coffee_detail_option);
         //변경사항을 설정한뒤 사용자가 설정사항을 저장시키기 위한 버튼이다.
         save_btn=(Button) view.findViewById(R.id.save_btn);
         //사용자가 자신의 프로필 사진을 설정하기위한 이미지뷰다.
         team_profile_url=(CircleImageView) view.findViewById(R.id.team_profile_url);
+        change_coffee=(TextView)view.findViewById(R.id.change_coffee);
 
         //사용자가 이전에 설정한 자신의 정보들을 DB에서 불러온다.
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -135,21 +133,21 @@ public class MyPageFragment extends Fragment {
             team_profile_url.setImageResource(R.drawable.basic_profile);
             nick_name.setText(user_nick_name);
             frequently_coffee.setText(user_frequently_coffee);
-            coffee_detail_option.setText(user_coffee_detail_option);
+            //coffee_detail_option.setText(user_coffee_detail_option);
         }
         else{
             Log.v(TAG,"img_uri null 아님");
             Glide.with(getContext()).load(img_uri).into(team_profile_url);
             nick_name.setText(user_nick_name);
             frequently_coffee.setText(user_frequently_coffee);
-            coffee_detail_option.setText(user_coffee_detail_option);
+            //coffee_detail_option.setText(user_coffee_detail_option);
         }
 
         frequently_coffee.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Log.v(TAG,"닉네임 변경");
 
-                Intent intent = new Intent(getContext(), SelectCoffeeActivity.class);
+                Intent intent = new Intent(getContext(), SelectCategoryActivity.class);
                 startActivity(intent);
             }
         });
@@ -170,7 +168,15 @@ public class MyPageFragment extends Fragment {
         });
 
 
+        //사용자가 자신의 음료를 변경하기 위해 누르는 '변경하기' 텍스트뷰
+        change_coffee.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Log.v(TAG,"변경하기 클릭");
 
+                Intent intent = new Intent(getContext(), SelectCategoryActivity.class);
+                startActivity(intent);
+            }
+        });
 
 
     //자신의 프로필을 수정한 사용자가 저장할 때 사용하는 버튼.
@@ -189,7 +195,7 @@ public class MyPageFragment extends Fragment {
                         @Override
                         public void onSuccess(Void aVoid) {
                             // 만약 사용자가 자신의 커피 옵션을 변경했다면 DB에 수정된 내용을 반영한다.
-                            db.collection("users3").document(currentUser.getEmail()).update("my_coffee_option",coffee_detail_option.getText().toString()).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            db.collection("users3").document(currentUser.getEmail()).update("my_coffee_option","뭐로든 바꿔").addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                     // 사용자가 자신의 프로필 사진을 변경하지 않은 경우

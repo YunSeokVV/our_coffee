@@ -29,11 +29,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/custom_edittext"
-        android:hint="  닉네임을 입력하세요           "
+        android:hint="닉네임을 입력하세요     "
         android:maxLength="40"
-        android:textColor="@color/black"
-        android:textColorHint="#8E7676"
-        android:textSize="20sp"
+        android:textColor="#8E7676"
+        android:textSize="23sp"
         app:layout_constraintStart_toStartOf="@+id/guideline9"
         app:layout_constraintTop_toBottomOf="@+id/textView5" />
 
@@ -44,46 +43,31 @@
         android:layout_marginStart="16dp"
         android:text="자주 먹는 커피"
         android:textColor="@color/black"
-        android:textSize="20sp"
+        android:textSize="23sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline8" />
 
-    <EditText
+    <TextView
         android:id="@+id/frequently_coffee"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/custom_edittext"
-        android:hint="  아이스 아메리카노           "
+        android:hint="아이스 아메리카노"
         android:maxLength="40"
-        android:textColor="@color/black"
-        android:textColorHint="#8E7676"
-        android:textSize="20sp"
+        android:textColor="#8E7676"
+        android:textSize="23sp"
         app:layout_constraintStart_toStartOf="@+id/guideline9"
         app:layout_constraintTop_toBottomOf="@+id/coffee_text" />
 
-
     <TextView
-        android:id="@+id/coffee_option"
+        android:id="@+id/change_coffee"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="자주 먹는 커피 옵션"
         android:textColor="@color/black"
-        android:textSize="20sp"
-        app:layout_constraintStart_toStartOf="@+id/guideline9"
-        app:layout_constraintTop_toTopOf="@+id/guideline10" />
+        android:text="변경하기"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/guideline10"
+        app:layout_constraintEnd_toStartOf="@+id/guideline11" />
 
-    <EditText
-        android:id="@+id/coffee_detail_option"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/custom_edittext"
-        android:hint="  연한 농도                  "
-        android:maxLength="40"
-        android:textColor="@color/black"
-        android:textColorHint="#8E7676"
-        android:textSize="20sp"
-        app:layout_constraintStart_toStartOf="@+id/guideline9"
-        app:layout_constraintTop_toBottomOf="@+id/coffee_option" />
 
     <Space
         android:id="@+id/space"
@@ -92,7 +76,7 @@
 
         app:layout_constraintEnd_toStartOf="@+id/team_profile_url"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintHorizontal_weight="30"
+        app:layout_constraintHorizontal_weight="20"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline7" />
 
@@ -103,7 +87,7 @@
         android:layout_height="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintHorizontal_weight="30"
+        app:layout_constraintHorizontal_weight="20"
         app:layout_constraintStart_toEndOf="@+id/team_profile_url"
         app:layout_constraintTop_toTopOf="@+id/guideline7" />
 
@@ -114,7 +98,7 @@
         android:layout_height="wrap_content"
         android:text="닉네임"
         android:textColor="@color/black"
-        android:textSize="20sp"
+        android:textSize="23sp"
         app:layout_constraintStart_toStartOf="@+id/guideline9"
         app:layout_constraintTop_toTopOf="@+id/guideline6" />
 
@@ -123,7 +107,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.35" />
+        app:layout_constraintGuide_percent="0.45" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline7"
@@ -137,7 +121,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.55" />
+        app:layout_constraintGuide_percent="0.65" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline10"
@@ -145,6 +129,13 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.75" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline12"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.95" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline9"
@@ -164,7 +155,7 @@
         android:id="@+id/team_profile_url"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintHorizontal_weight="40"
+        app:layout_constraintHorizontal_weight="60"
         android:src="@drawable/basic_profile"
 
         app:layout_constraintEnd_toStartOf="@+id/space2"
@@ -184,9 +175,10 @@
         android:textColor="@color/white"
         android:textSize="27sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
+
+        app:layout_constraintStart_toStartOf="@+id/guideline9"
+        app:layout_constraintBottom_toTopOf="@+id/guideline12"
         app:layout_constraintDimensionRatio="10:2"
-        app:layout_constraintEnd_toStartOf="@+id/guideline11"
-        app:layout_constraintStart_toStartOf="@+id/coffee_detail_option" />
+        app:layout_constraintEnd_toStartOf="@+id/guideline11" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

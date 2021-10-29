@@ -8,8 +8,10 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
         android:theme="@style/Theme.Our_coffee">
-        <activity android:name=".Utils.SelectCoffeeActivity"></activity>
+        <activity android:name=".ConfigureCoffeeActivity"></activity>
+        <activity android:name=".SelectCategoryActivity" />
         <activity android:name=".Add_new_member" />
         <activity android:name=".Team_member" />
         <activity android:name=".Make_newteam" />
@@ -23,8 +25,8 @@
             </intent-filter>
         </activity>
     </application>
-    <uses-permission android:name="android.permission.INTERNET" />
-
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
 
 </manifest>

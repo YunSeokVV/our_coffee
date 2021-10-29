@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Utils.SelectCoffeeActivity"
+    tools:context=".SelectCategoryActivity"
     android:background="@color/white"
     >
 
@@ -18,5 +18,19 @@
         app:theme="@style/Base.Theme.AppCompat.Light.DarkActionBar"
         app:title="커피 설정"
         />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/coffee_category"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:scrollbarFadeDuration="0"
+        android:scrollbarSize="10dp"
+        android:scrollbars="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
