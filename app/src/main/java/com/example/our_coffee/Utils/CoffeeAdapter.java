@@ -25,6 +25,10 @@ public class CoffeeAdapter  extends RecyclerView.Adapter<CoffeeAdapter.CustomVie
     //리사이클러뷰의 각 아이템을 클릭할 수 있도록 선언한 객체다.
     OnItemClickListener listener;
 
+    public void setOnItemClickListener(CoffeeAdapter.OnItemClickListener listener) {
+        this.listener=listener;
+    }
+
     //아이템 클릭시 나타나는 이벤트 이 메소드를 사용해서 리사이클러뷰의 각 아이템에 접근할 수 있다.
     public static interface  OnItemClickListener{
         public void onItemClick(CustomViewHolder_CoffeeAdapter holder, View view, int position);
@@ -60,10 +64,7 @@ public class CoffeeAdapter  extends RecyclerView.Adapter<CoffeeAdapter.CustomVie
     }
 
 
-    //아이템 클릭시 나타나는 이벤트 이 메소드를 사용해서 리사이클러뷰의 각 아이템에 접근할 수 있다.
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        this.listener=listener;
-    }
+
 
     public class CustomViewHolder_CoffeeAdapter extends RecyclerView.ViewHolder {
         protected TextView team_name;

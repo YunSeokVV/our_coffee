@@ -20,38 +20,28 @@
         />
 
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipe_drinks"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/coffee_list"
         android:layout_width="0dp"
         android:layout_height="0dp"
-
+        android:scrollbarFadeDuration="0"
+        android:scrollbarSize="10dp"
+        android:scrollbars="vertical"
         app:layout_constraintBottom_toTopOf="@+id/guideline1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/coffee_list"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:scrollbarFadeDuration="0"
-            android:scrollbarSize="10dp"
-            android:scrollbars="vertical"
-            app:layout_constraintBottom_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="parent" />
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
 
     <TextView
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="#CA43B4"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/swipe_drinks" />
+        app:layout_constraintTop_toBottomOf="@+id/coffee_list" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -71,10 +61,12 @@
         android:backgroundTint="@color/white"
         android:text="아메리카노"
         android:textColor="@color/white"
-        android:textSize="36sp"
+        android:textSize="25sp"
         app:layout_constraintEnd_toStartOf="@+id/guideline5"
         app:layout_constraintStart_toStartOf="@+id/guideline3"
-        app:layout_constraintTop_toTopOf="@+id/guideline4" />
+        app:layout_constraintTop_toTopOf="@+id/guideline4"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline1"

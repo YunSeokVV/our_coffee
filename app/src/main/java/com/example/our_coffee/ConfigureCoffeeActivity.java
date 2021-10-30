@@ -13,8 +13,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.EditText;
 
 import com.example.our_coffee.Utils.Coffee;
 import com.example.our_coffee.Utils.CoffeeAdapter;
@@ -61,8 +65,9 @@ public class ConfigureCoffeeActivity extends AppCompatActivity {
     // DB에서 필요한 데이터를 다운받기 전까지 화면에 다운중이라는 사실을 알려주기 위환 dialog 다.
     ProgressDialog dialog;
 
-    // 새로고침을 안하면 이미지들이 공백으로 나온다. 그래서 강제로 새로고침 시켰다.
-    SwipeRefreshLayout mSwipeRefreshLayout;
+    // 사용자가 원하는 음료를 EditText 에 표현.
+    EditText choice_drink;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +76,7 @@ public class ConfigureCoffeeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_configure_coffee);
         coffee_list=(RecyclerView)findViewById(R.id.coffee_list);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
-        mSwipeRefreshLayout=(SwipeRefreshLayout)findViewById(R.id.swipe_drinks);
+        choice_drink=(EditText)findViewById(R.id.editText4) ;
         setSupportActionBar(toolbar);
         //툴바의 뒤로가기 버튼을 활성화 한다
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -105,24 +110,23 @@ public class ConfigureCoffeeActivity extends AppCompatActivity {
         Download_dialog("데이터 로드중");
         LoadDrinkMenu();
 
-
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        coffeeAdapter.setOnItemClickListener(new CoffeeAdapter.OnItemClickListener() {
             @Override
-            public void onRefresh() {
-
-                final Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mSwipeRefreshLayout.setRefreshing(false);
-                    }
-                }, 1500);
-
+            public void onItemClick(CoffeeAdapter.CustomViewHolder_CoffeeAdapter holder, View view, int position) {
+                Log.v(TAG,"데이터 확인 "+coffee.get(position).getDrink_name());
+                String text=coffee.get(position).getDrink_name();
+                choice_drink.setText(text);
             }
         });
 
-
     }       //onCreate end
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.confirm_tool_bar, menu);
+        return true;
+    }
 
     public void LoadDrinkMenu(){
         db = FirebaseFirestore.getInstance();
@@ -183,6 +187,26 @@ public class ConfigureCoffeeActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId()==android.R.id.home/*지정한 id*/){
+            finish();
+            return true;
+        }
+        switch (item.getItemId()) {
+            case R.id.confirm_button:
+                Intent intent = new Intent(getApplicationContext(), CoffeeDetailOptionActivity.class);
+                startActivity(intent);
+                Log.v(TAG,"완료 버튼 클릭");
+                //check point
+
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
     }
 
     // 화면에 필요한 정보들을 보여주기 위해서 DB에서 데이터를 받아올 때 까지 로딩중이라는 사실을 알려주는 다이얼로그 메소드다.
