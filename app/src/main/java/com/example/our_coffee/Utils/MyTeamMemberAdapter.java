@@ -46,6 +46,7 @@ public class MyTeamMemberAdapter extends RecyclerView.Adapter<MyTeamMemberAdapte
         viewholder.member_name.setText(mList.get(position).getMember_name());
         viewholder.coffee_menu.setText(mList.get(position).getCoffee_menu());
         viewholder.detail_option.setText(mList.get(position).getCoffee_option());
+        viewholder.detail_option.setVisibility(View.GONE);
 
         Glide.with(viewholder.itemView.getContext())
                 .load(myteamMember.getImage_url())

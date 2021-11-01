@@ -26,7 +26,7 @@ import java.util.ArrayList;
 
 public class SelectCategoryActivity extends AppCompatActivity {
 
-    public static String TAG = "SelectCoffeeActivity";
+    public static String TAG = "SelectCategoryActivity";
     Toolbar toolbar;
 
     //리사이클러뷰 관련 코드
@@ -86,9 +86,14 @@ public class SelectCategoryActivity extends AppCompatActivity {
                 Log.v(TAG,"아이템을 클릭함 "+position);
                 Log.v(TAG,coffeeCategory.get(position).getCategory_name());
 
+                Intent get_intent = getIntent();
+                // 이전에 설정한 사용자가 자주 먹는 음료
+                String user_frequently_coffee = get_intent.getStringExtra("user_frequently_coffee");
+
                 Intent intent = new Intent(getApplicationContext(), ConfigureCoffeeActivity.class);
+                intent.putExtra("user_frequently_coffee",user_frequently_coffee);
                 intent.putExtra("category", coffeeCategory.get(position).getCategory_name());
-                startActivity(intent);
+                startActivityForResult(intent,433);
             }
         });
 
@@ -106,6 +111,26 @@ public class SelectCategoryActivity extends AppCompatActivity {
         }
         else{
             return true;
+        }
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.v(TAG,"onActivityResult");
+        Log.v(TAG,"requestCode : "+requestCode);
+        Log.v(TAG,"resultCode : "+resultCode);
+        if (resultCode == 1345678) // 액티비티가 정상적으로 종료되었을 경우
+        {
+            if (requestCode == 433) // requestCode==1 로 호출한 경우에만 처리.
+            {
+                Log.v(TAG,"받아온 데이터 : "+data.getStringExtra("choiced_drink"));
+                Intent result_intent=new Intent();
+                result_intent.putExtra("choiced_drink", data.getStringExtra("choiced_drink"));
+                setResult(RESULT_OK, result_intent);
+                finish();
+            }
         }
 
     }

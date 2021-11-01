@@ -1024,6 +1024,8 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
 
         }
 
+
+
     }       //onActivityResult end
 
     // 앱이 처음 실행 됐을 때 마이페이지에 필요한 데이터를 DB에서 불러온다.

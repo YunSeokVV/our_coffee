@@ -92,10 +92,6 @@ public class MyPageFragment extends Fragment {
             user_coffee_detail_option=bundle.getString("user_coffee_detail_option");
             img_uri=bundle.getString("image_uri");
 
-//            Log.v(TAG,user_nick_name);
-//            Log.v(TAG,user_frequently_coffee);
-//            Log.v(TAG,user_coffee_detail_option);
-//            Log.v(TAG,img_uri);
         }
         else{
             Log.v(TAG,"bundle null 임");
@@ -174,7 +170,8 @@ public class MyPageFragment extends Fragment {
                 Log.v(TAG,"변경하기 클릭");
 
                 Intent intent = new Intent(getContext(), SelectCategoryActivity.class);
-                startActivity(intent);
+                intent.putExtra("user_frequently_coffee", user_frequently_coffee);
+                startActivityForResult(intent,434);
             }
         });
 
@@ -200,8 +197,12 @@ public class MyPageFragment extends Fragment {
                                 public void onSuccess(Void aVoid) {
                                     // 사용자가 자신의 프로필 사진을 변경하지 않은 경우
                                     if(profile_path.equals("")){
-                                        System.out.println("프로필 사진을 변경하지 않았다.");
+                                        Log.v(TAG,"프로필 사진을 변경하지 않았다.");
                                         dialog.dismiss();
+
+                                        userProfileChanged.UserProfileChanged();
+                                        Toast myToast = Toast.makeText(getContext(),"프로필 정보를 수정하였습니다 :)", Toast.LENGTH_SHORT);
+                                        myToast.show();
                                     }
                                     // 사용자가 자신의 프로필 사진을 변경한 경우
                                     else if(!profile_path.equals("")){
@@ -236,10 +237,6 @@ public class MyPageFragment extends Fragment {
                     Log.v(TAG, "Error writing document", e);
                 }
             });
-
-
-
-            //todo : 자주 먹는 커피, 자주 먹는 커피 옵션을 수정하게끔 하는 기능은 아직 구현하지 못했다. 하셈.
 
         } });
 
@@ -330,6 +327,8 @@ public class MyPageFragment extends Fragment {
     //주의 : onActivityResult 는 Framgent 클래스에서 deprecated 됐지만 여전히 사용되는 메소드다. 일단 참고.
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.v(TAG,"onActivityResult 로그");
+        Log.v(TAG,"requestCode "+requestCode);
+        Log.v(TAG,"resultCode "+resultCode);
 
 
         super.onActivityResult(requestCode, resultCode, data);
@@ -340,8 +339,14 @@ public class MyPageFragment extends Fragment {
             //사용자가 자신의 프로필 사진을 설정한 경우 프로필 사진을 변경할 수 있다.
             profile_path=selectedImageUri.getPath();
 
-
         }
+
+        else if(requestCode==434 && resultCode==-1){
+            Log.v(TAG,"잘 되노");
+            Log.v(TAG,data.getStringExtra("choiced_drink"));
+            frequently_coffee.setText(data.getStringExtra("choiced_drink"));
+        }
+
 
     }
 

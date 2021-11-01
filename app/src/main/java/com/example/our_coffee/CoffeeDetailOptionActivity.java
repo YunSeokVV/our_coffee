@@ -1,5 +1,6 @@
 package com.example.our_coffee;
 // 커피의 상세 옵션을 설정하는 액티비티다.
+// todo : 이 기능은 2021.11.01 기능 구현을 중단하기로 결정했다. 그 이유에 대해서는 이날 작성했던 에버노트의 공부로그를 참고할 것.
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.Toolbar;
@@ -27,8 +28,8 @@ public class CoffeeDetailOptionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_coffee_detail_option);
 
 
-        hot_btn=(AppCompatButton)findViewById(R.id.hot_btn);
-        ice_btn=(AppCompatButton)findViewById(R.id.ice_btn);
+        //hot_btn=(AppCompatButton)findViewById(R.id.hot_btn);
+        //ice_btn=(AppCompatButton)findViewById(R.id.ice_btn);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -57,7 +58,7 @@ public class CoffeeDetailOptionActivity extends AppCompatActivity {
     }
 
 
-
+    // 뜨거운 음료를 선택 했을 때 버튼을 토글 버튼을 설정하는 메소드 입니다.
     private void ChooseHot(){
         hot_btn.setBackground(ContextCompat.getDrawable(this, R.drawable.hot_button_radius));
         hot_btn.setTextColor(getResources().getColor(R.color.white));
@@ -67,6 +68,7 @@ public class CoffeeDetailOptionActivity extends AppCompatActivity {
 
     }
 
+    // 차가운 음료를 선택 했을 때 버튼을 토글 버튼을 설정하는 메소드 입니다.
     private void ChooseIced(){
         hot_btn.setBackground(ContextCompat.getDrawable(this, R.drawable.hot_button_white));
         hot_btn.setTextColor(getResources().getColor(R.color.black));

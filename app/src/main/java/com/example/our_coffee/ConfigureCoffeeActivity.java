@@ -68,6 +68,8 @@ public class ConfigureCoffeeActivity extends AppCompatActivity {
     // 사용자가 원하는 음료를 EditText 에 표현.
     EditText choice_drink;
 
+    // 사용자가 이전에 골랐던 음료.
+    String user_coffee;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,9 +85,12 @@ public class ConfigureCoffeeActivity extends AppCompatActivity {
 
         Intent intent=getIntent();
         category=intent.getExtras().getString("category");
+        user_coffee=intent.getExtras().getString("user_frequently_coffee");
 
         //팀명을 툴바 제목으로 설정한다.
         toolbar.setTitle(category);
+
+        choice_drink.setText(user_coffee);
 
         LinearLayoutManager mLinearLayoutManager = new LinearLayoutManager(getApplicationContext());
         coffee_list.setLayoutManager(mLinearLayoutManager);
@@ -197,10 +202,14 @@ public class ConfigureCoffeeActivity extends AppCompatActivity {
         }
         switch (item.getItemId()) {
             case R.id.confirm_button:
-                Intent intent = new Intent(getApplicationContext(), CoffeeDetailOptionActivity.class);
-                startActivity(intent);
-                Log.v(TAG,"완료 버튼 클릭");
-                //check point
+                //Intent intent = new Intent(getApplicationContext(), CoffeeDetailOptionActivity.class);
+                //startActivity(intent);
+                Log.v(TAG,"아이템 선택");
+                Intent result_intent=new Intent();
+                result_intent.putExtra("choiced_drink", choice_drink.getText().toString());
+                setResult(1345678, result_intent);
+                finish();
+
 
                 return true;
             default:
