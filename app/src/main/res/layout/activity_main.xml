@@ -28,7 +28,8 @@
         android:id="@+id/frameLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/linearLayout"
+
+        app:layout_constraintBottom_toTopOf="@+id/guideline5"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar">
@@ -39,12 +40,12 @@
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:orientation="horizontal"
         android:background="@color/white"
+        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent">
-
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/frameLayout">
 
 
         <ImageView
@@ -53,10 +54,9 @@
             android:layout_height="wrap_content"
 
             android:layout_weight="1"
-            android:onClick="clickHandler"
-            android:src="@drawable/group"
             android:background="@color/white"
-            />
+            android:onClick="clickHandler"
+            android:src="@drawable/group" />
 
         <ImageView
             android:id="@+id/btn_fragment_mypage"
@@ -64,21 +64,26 @@
             android:layout_height="wrap_content"
 
             android:layout_weight="1"
-            android:onClick="clickHandler"
-            android:src="@drawable/my_page"
             android:background="@color/white"
-            />
+            android:onClick="clickHandler"
+            android:src="@drawable/my_page" />
 
         <ImageView
             android:id="@+id/btn_fragment_notify"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/notification_icon"
             android:layout_weight="1"
-            android:onClick="clickHandler"
             android:background="@color/white"
-            />
+            android:onClick="clickHandler"
+            android:src="@drawable/notification_icon" />
 
     </LinearLayout>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.93" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

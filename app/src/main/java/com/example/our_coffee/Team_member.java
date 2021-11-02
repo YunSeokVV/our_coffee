@@ -249,7 +249,7 @@ public class Team_member extends AppCompatActivity {
                                             member_nick_name.add(String.valueOf(document.get("nick_name")));
 
                                             MyteamMember data;
-                                            data = new MyteamMember(String.valueOf(document.get("nick_name")),"work",String.valueOf(document.get("my_coffee")),String.valueOf(document.get("my_coffee_option")));
+                                            data = new MyteamMember(String.valueOf(document.get("nick_name")),"work",String.valueOf("원하는 음료 : "+document.get("my_coffee")),String.valueOf(document.get("my_coffee_option")));
                                             team_memberArrayList.set(finalI,data);
 
                                             //DB 에서 데이터를 마지막으로 받아온 상황이다.

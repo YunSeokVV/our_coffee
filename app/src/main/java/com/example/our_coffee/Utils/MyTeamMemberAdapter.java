@@ -46,6 +46,8 @@ public class MyTeamMemberAdapter extends RecyclerView.Adapter<MyTeamMemberAdapte
         viewholder.member_name.setText(mList.get(position).getMember_name());
         viewholder.coffee_menu.setText(mList.get(position).getCoffee_menu());
         viewholder.detail_option.setText(mList.get(position).getCoffee_option());
+
+        // 음료에 대한 상세옵션 기능을 중단하면서 GONE 처리 했다.
         viewholder.detail_option.setVisibility(View.GONE);
 
         Glide.with(viewholder.itemView.getContext())
