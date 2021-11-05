@@ -45,7 +45,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 public class MyTeamFragement extends Fragment {
 
-    public static String TAG="MyTeamFragment";
+    public static final String TAG="MyTeamFragment";
     FirebaseAuth mAuth;
     FirebaseUser currentUser;
 

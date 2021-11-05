@@ -46,7 +46,7 @@ public class MyPageFragment extends Fragment {
     FirebaseAuth mAuth;
     //FireBase 에 이미지를 저장하기위해 선언한 인스턴스
     FirebaseStorage storage = FirebaseStorage.getInstance();
-    public static String TAG="MyPageFragment";
+    public static final String TAG="MyPageFragment";
 
     //서버에서 사용자가 이전에 설정한 값들을 받아왔을 때 담는 변수들이다. (사용자가 자주 마시는 커피, 사용자 닉네임, 사용자 커피 옵션, 사용자 프로필사진 uri)
     String user_nick_name;
@@ -91,11 +91,14 @@ public class MyPageFragment extends Fragment {
             user_frequently_coffee=bundle.getString("user_frequently_coffee");
             user_coffee_detail_option=bundle.getString("user_coffee_detail_option");
             img_uri=bundle.getString("image_uri");
+            Log.v(TAG,user_nick_name);
 
         }
         else{
             Log.v(TAG,"bundle null 임");
         }
+
+        View view=inflater.inflate(R.layout.fragment_mypage,container,false);
 
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
@@ -106,7 +109,6 @@ public class MyPageFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-
         //사용자가 자신의 닉네임을 설정할 수 있다.
         nick_name=(EditText) view.findViewById(R.id.nick_name);
         //사용자가 자신이 자주 먹는 커피를 표현하는 EditText 다.
@@ -126,15 +128,17 @@ public class MyPageFragment extends Fragment {
 
         if(img_uri==null){
             Log.v(TAG,"img_uri null 임");
-            team_profile_url.setImageResource(R.drawable.basic_profile);
+            Log.v(TAG,user_nick_name);
             nick_name.setText(user_nick_name);
+            team_profile_url.setImageResource(R.drawable.basic_profile);
             frequently_coffee.setText(user_frequently_coffee);
             //coffee_detail_option.setText(user_coffee_detail_option);
         }
         else{
             Log.v(TAG,"img_uri null 아님");
-            Glide.with(getContext()).load(img_uri).into(team_profile_url);
+            Log.v(TAG,user_nick_name);
             nick_name.setText(user_nick_name);
+            Glide.with(getContext()).load(img_uri).into(team_profile_url);
             frequently_coffee.setText(user_frequently_coffee);
             //coffee_detail_option.setText(user_coffee_detail_option);
         }

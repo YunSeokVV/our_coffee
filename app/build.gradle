@@ -57,4 +57,8 @@ dependencies {
 
     //FireBase Storgae (이미지 저장)를 사용하기위한 라이브러리
     implementation 'com.google.firebase:firebase-storage'
+
+    // 네이버 아이디로 로그인 라이브러리 추가
+    implementation files('libs\\naveridlogin_android_sdk_4.2.6.aar')
+
 }

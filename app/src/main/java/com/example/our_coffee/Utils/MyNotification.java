@@ -1,10 +1,18 @@
 package com.example.our_coffee.Utils;
 
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.example.our_coffee.MyPageFragment;
+
 // 자신에게 온 초대 알림을 리사이클러뷰로 표현해 주기 위한 클래스다.
 public class MyNotification {
+
+
+
+    public static String TAG="MyNotification";
+
     // 자신의 팀을 표현하는 변수다
     String team_name;
 

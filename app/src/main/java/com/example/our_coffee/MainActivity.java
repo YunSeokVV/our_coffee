@@ -15,6 +15,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 
@@ -28,6 +29,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
@@ -83,6 +85,8 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
     // DB에서 필요한 데이터를 다운받기 전까지 화면에 다운중이라는 사실을 알려주기 위환 dialog 다.
     ProgressDialog dialog;
 
+    BottomNavigationView bottomNavigationView;
+
     Bundle bundle;
 
     // DB에서 데이터를 처음 불러올 때 사용자에게 화면을 보이게 하기 위해서 프레그먼트를 딱 한번 commit 해줘야 한다. 이 값이 변경되면 다시 실행되지 않는다.
@@ -98,6 +102,8 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
         toolbar = (Toolbar)findViewById(R.id.toolbar);
         toolbar.setTitle("나의 팀 목록");
         toolbar.setTitleTextColor(Color.BLACK);
+
+        bottomNavigationView = findViewById(R.id.nav_view);
 
         setSupportActionBar(toolbar);
 
@@ -136,33 +142,35 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
         GetMyPageData();
 
 
-
+        bottomNavigationView.setOnNavigationItemSelectedListener(
+                new BottomNavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                        FragmentTransaction transaction= fragmentManager.beginTransaction();;
+                        switch (item.getItemId()) {
+                            case R.id.btn_fragment_team_list:
+                                toolbar.setTitle("나의 팀 목록");
+                                //commitAllowingStateLoss : Like {@link #commit} but allows the commit to be executed after an activity's state is saved.
+                                transaction.replace(R.id.frameLayout, fragment_myteam).commitAllowingStateLoss();
+                                break;
+                            case R.id.btn_fragment_mypage:
+                                toolbar.setTitle("마이페이지");
+                                transaction.replace(R.id.frameLayout, fragment_mypage).commitAllowingStateLoss();
+                                break;
+                            case R.id.btn_fragment_notify:
+                                toolbar.setTitle("알림");
+                                transaction.replace(R.id.frameLayout, fragment_notification).commitAllowingStateLoss();
+                                break;
+                        }
+                        return true;
+                    }
+                });
 
 
     }
 
-    public void clickHandler(View view)
-    {
-        Log.i("코드의 흐름","clickHandler 메소드 호출");
-        transaction = fragmentManager.beginTransaction();
 
-        switch(view.getId())
-        {
-            case R.id.btn_fragment_team_list:
-                toolbar.setTitle("나의 팀 목록");
-                //commitAllowingStateLoss : Like {@link #commit} but allows the commit to be executed after an activity's state is saved.
-                transaction.replace(R.id.frameLayout, fragment_myteam).commitAllowingStateLoss();
-                break;
-            case R.id.btn_fragment_mypage:
-                toolbar.setTitle("마이페이지");
-                transaction.replace(R.id.frameLayout, fragment_mypage).commitAllowingStateLoss();
-                break;
-            case R.id.btn_fragment_notify:
-                toolbar.setTitle("알림");
-                transaction.replace(R.id.frameLayout, fragment_notification).commitAllowingStateLoss();
-                break;
-        }
-    }
+
 
     // 알림화면에서 리사이클러뷰를(누가 사용자를 초대해줬는지) 표현하기위해 필요한 데이터들을 이 메소드에서 정리한다.
     //앱이 가장 먼저 실행됐을때 호출된다. 사용자가 팀 초대 수락을 받아서 팀이 추가될 때는 이 메소드가 호출되지 않는다.
