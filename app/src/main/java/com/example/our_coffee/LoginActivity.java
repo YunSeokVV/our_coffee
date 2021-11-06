@@ -2,6 +2,7 @@ package com.example.our_coffee;
 // 이 파일은 로그인 화면이다. 카카오톡, 네이버, 페이스북 아이디로 로그인 할 수 있다.
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -14,6 +15,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +27,16 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.kakao.auth.ApiErrorCode;
+import com.kakao.auth.AuthType;
+import com.kakao.auth.ISessionCallback;
+import com.kakao.auth.Session;
+import com.kakao.network.ErrorResult;
+import com.kakao.usermgmt.UserManagement;
+import com.kakao.usermgmt.callback.MeV2ResponseCallback;
+import com.kakao.usermgmt.response.MeV2Response;
+import com.kakao.usermgmt.response.model.UserAccount;
+import com.kakao.util.exception.KakaoException;
 import com.nhn.android.naverlogin.OAuthLogin;
 import com.nhn.android.naverlogin.OAuthLoginHandler;
 import com.nhn.android.naverlogin.ui.view.OAuthLoginButton;
@@ -48,6 +60,12 @@ public class LoginActivity extends Activity {
 
     Button login_btn;
 
+    //카카오 아이디로 로그인 기능을 구현하기 위한 버튼
+    ImageButton btn_custom_login;
+    //카카오 아이디로 로그인 기능을 작동하는데 필요한 세션
+    Session session;
+    SessionCallback sessionCallback = new SessionCallback();
+
     //다른 액티비티에서도 이 액티비티를 종료시키 수 있게끔 하기위해 static 객체를 선언했다
     public static LoginActivity loginActivity;
 
@@ -56,6 +74,8 @@ public class LoginActivity extends Activity {
     private FirebaseAuth mAuth;
 
     Context context;
+
+
 
     //아래 코드들은 네이버아이디로 로그인 API 를 사용하는데 필요한 값들이다.
     //client 정보
@@ -74,8 +94,6 @@ public class LoginActivity extends Activity {
 
         context=this;
 
-        //button.setBackgroundResource(R.drawable.round);
-
         //만약 사용자가 로그인한 상태라면 다음 화면으로 자동으로 넘어간다.
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if(currentUser != null){
@@ -90,10 +108,13 @@ public class LoginActivity extends Activity {
             //reload();
         }
 
+        btn_custom_login = (ImageButton) findViewById(R.id.btn_custom_login);
         put_id=(EditText)findViewById(R.id.editText);
         put_pw=(EditText)findViewById(R.id.editText2);
         make_id=(TextView)findViewById(R.id.make_id);
         login_btn=(Button)findViewById(R.id.login_btn);
+
+
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
@@ -124,6 +145,16 @@ public class LoginActivity extends Activity {
             }
         });
 
+        session = Session.getCurrentSession();
+        session.addCallback(sessionCallback);
+
+        btn_custom_login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                session.open(AuthType.KAKAO_LOGIN_ALL, LoginActivity.this);
+            }
+        });
+
         NaverAPILogin();
 
     }       //onCreate end
@@ -134,6 +165,28 @@ public class LoginActivity extends Activity {
         super.onStart();
 
     }       //onStart end
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // 세션 콜백 삭제
+        Session.getCurrentSession().removeCallback(sessionCallback);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        Log.v(TAG,"onActivityResult 호출");
+        // 카카오톡|스토리 간편로그인 실행 결과를 받아서 SDK로 전달
+        if (Session.getCurrentSession().handleActivityResult(requestCode, resultCode, data)) {
+            super.onActivityResult(requestCode, resultCode, data);
+
+
+            return;
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 
     // 사용자가 앱에 로그인한다. 로그인을 위해서 FireBase 의 Authentication 기능을 사용했다. '염창근' 계정의 MatchingApp-Tinder 를 참조 할 것.
     public void Login(String email, String password){
@@ -242,7 +295,7 @@ public class LoginActivity extends Activity {
                     Log.v(TAG,"profile_image : "+profile_image);
 
                     //check point 여기서 부터 해야할 일을 정의
-                    CheckRegister(email,name,profile_image);
+                    CheckRegister(email,name);
                 }
 
             } catch (JSONException e) {
@@ -252,7 +305,7 @@ public class LoginActivity extends Activity {
     }
 
     // 소셜네트워크 로그인을 진행했을 회원가입여부를 묻는 다이얼로그 창
-    public void CheckRegister(String email,String name,String profile_image)
+    public void CheckRegister(String email,String name)
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
@@ -264,7 +317,7 @@ public class LoginActivity extends Activity {
             {
                 Toast.makeText(getApplicationContext(), "회원 가입이 완료 되었습니다!!", Toast.LENGTH_SHORT).show();
 
-                Make_Account(email,name,profile_image);
+                Make_Account(email,name);
 
                 //사용자 팀 목록 화면으로 이동한다.
                 //Intent intent = new Intent(getApplicationContext(), MainActivity.class);
@@ -286,11 +339,10 @@ public class LoginActivity extends Activity {
     }
 
     //사용자의 계정을 만드는 역할을 해주는 메소드다. FireBase 의 Authentication 을 사용한다. '염창근' 계정의 FireBase에서 MatchingApp-Tinder 에 저장이 된다.
-    public void Make_Account(String email,String name,String profile_image){
+    public void Make_Account(String email,String name){
         Log.v(TAG,"Make_Account");
         Log.v(TAG,email);
         Log.v(TAG,name);
-        Log.v(TAG,profile_image);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
@@ -360,4 +412,51 @@ public class LoginActivity extends Activity {
 
     }
 
+
+    // 카카오톡아이디로 로그인을 진행할 때 사용하는 세션 콜백. 사용자의 이름, 이메일을 받아 온 뒤의 일을 여기서 처리해준다.
+    private class SessionCallback implements ISessionCallback {
+        @Override
+        public void onSessionOpened() {
+            UserManagement.getInstance().me(new MeV2ResponseCallback() {
+                @Override
+                public void onFailure(ErrorResult errorResult) {
+                    int result = errorResult.getErrorCode();
+
+                    if(result == ApiErrorCode.CLIENT_ERROR_CODE) {
+                        Toast.makeText(getApplicationContext(), "네트워크 연결이 불안정합니다. 다시 시도해 주세요.", Toast.LENGTH_SHORT).show();
+                        finish();
+                    } else {
+                        Toast.makeText(getApplicationContext(),"로그인 도중 오류가 발생했습니다: "+errorResult.getErrorMessage(),Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onSessionClosed(ErrorResult errorResult) {
+                    Toast.makeText(getApplicationContext(),"세션이 닫혔습니다. 다시 시도해 주세요: "+errorResult.getErrorMessage(),Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onSuccess(MeV2Response result) {
+                    Log.v(TAG,"성공함");
+                    UserAccount kakaoAccount = result.getKakaoAccount();
+                    String email = kakaoAccount.getEmail();
+                    Log.v(TAG,result.getNickname());
+                    Log.v(TAG,email);
+
+                    CheckRegister(email,result.getNickname());
+
+//                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+//                    intent.putExtra("name", result.getNickname());
+//                    intent.putExtra("profile", result.getProfileImagePath());
+//                    startActivity(intent);
+//                    finish();
+                }
+            });
+        }
+
+        @Override
+        public void onSessionOpenFailed(KakaoException e) {
+            Toast.makeText(getApplicationContext(), "로그인 도중 오류가 발생했습니다. 인터넷 연결을 확인해주세요: "+e.toString(), Toast.LENGTH_SHORT).show();
+        }
+    }
 }
