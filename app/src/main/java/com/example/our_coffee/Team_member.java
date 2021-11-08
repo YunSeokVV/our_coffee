@@ -422,7 +422,11 @@ public class Team_member extends AppCompatActivity {
 
         for(int i=0;i<coffee_number.size();i++){
             data=new GatherTeam(coffee_menu_list.get(i)+" : "+coffee_number.get(i)+"명");
-            gatherTeamArrayList.add(0,data);
+
+            // 1명 이상 선택한 음료의 경우만 보여준다.
+            if(coffee_number.get(i)!=0){
+                gatherTeamArrayList.add(0,data);
+            }
         }
         gatherTeamAdapter.notifyDataSetChanged();
 
