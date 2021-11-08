@@ -24,6 +24,21 @@
         app:layout_constraintStart_toEndOf="@+id/space3"
         app:layout_constraintTop_toTopOf="@+id/guideline6" />
 
+    <Button
+        android:id="@+id/facebook_login"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        android:layout_margin="10dp"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/facebook_icon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/buttonOAuthLoginImg"
+        app:layout_constraintTop_toTopOf="@+id/guideline8" />
+
+
+
     <EditText
         android:id="@+id/editText"
         android:layout_width="0dp"
@@ -58,6 +73,19 @@
         app:layout_constraintStart_toStartOf="@+id/editText"
         app:layout_constraintTop_toBottomOf="@+id/editText" />
 
+    <ImageButton
+        app:layout_constraintHorizontal_chainStyle="packed"
+        android:id="@+id/btn_custom_login"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:background="@drawable/round_kakao_logo"
+        android:text="카카오 로그인"
+        android:layout_margin="10dp"
+        app:layout_constraintEnd_toStartOf="@+id/buttonOAuthLoginImg"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline8" />
+
     <Space
         android:id="@+id/space"
         android:layout_width="0dp"
@@ -75,6 +103,7 @@
         app:layout_constraintHorizontal_weight="10"
         app:layout_constraintStart_toEndOf="@+id/editText"
         app:layout_constraintTop_toTopOf="@+id/guideline5" />
+
 
     <Space
         android:id="@+id/space3"
@@ -97,7 +126,6 @@
         app:layout_constraintHorizontal_weight="10"
         app:layout_constraintStart_toEndOf="@+id/login_btn"
         app:layout_constraintTop_toTopOf="@+id/guideline6" />
-
 
     <TextView
         android:id="@+id/textView"
@@ -127,29 +155,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline3" />
 
-    <com.nhn.android.naverlogin.ui.view.OAuthLoginButton
-        android:id="@+id/buttonOAuthLoginImg"
-
-        android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageButton
-        android:id="@+id/btn_custom_login"
-        android:layout_width="55dp"
-        android:layout_height="55dp"
-        android:background="@drawable/round_kakao_logo"
-        android:text="카카오 로그인"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.293"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.489" />
-
     <TextView
         android:id="@+id/textView3"
         android:layout_width="match_parent"
@@ -162,7 +167,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline4" />
 
-
     <TextView
         android:id="@+id/make_id"
         android:layout_width="wrap_content"
@@ -174,6 +178,7 @@
         app:layout_constraintEnd_toStartOf="@+id/find_id"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline7" />
+
 
     <TextView
         android:id="@+id/find_id"
@@ -240,5 +245,23 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.93" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.35" />
+
+    <com.nhn.android.naverlogin.ui.view.OAuthLoginButton
+        android:id="@+id/buttonOAuthLoginImg"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_margin="10dp"
+        app:layout_constraintEnd_toStartOf="@+id/facebook_login"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/btn_custom_login"
+        app:layout_constraintTop_toTopOf="@+id/guideline8" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

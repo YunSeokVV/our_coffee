@@ -4,4 +4,8 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="myAppName">"ToolBar 구현예제"</string>
     <string name="kakao_app_key">adb76bdd13f454c6e751d909a7f30a0a</string>
+
+    <!-- 페이스북 아이디로 로그인 api -->
+    <string name="facebook_app_id">420359076236722</string>
+    <string name="fb_login_protocol_scheme">fb420359076236722</string>
 </resources>

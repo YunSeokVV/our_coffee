@@ -64,4 +64,6 @@ dependencies {
     // 카카오 아이디로 로그인 라이브러리 추가
     implementation group: project.KAKAO_SDK_GROUP, name: 'usermgmt', version: project.KAKAO_SDK_VERSION
 
+    // 페이스북 아이디로 로그인 라이브러리 추가
+    implementation 'com.facebook.android:facebook-android-sdk:[8,9)'
 }

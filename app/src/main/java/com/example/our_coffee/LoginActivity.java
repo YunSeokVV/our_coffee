@@ -19,6 +19,15 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -47,6 +56,9 @@ import org.json.JSONObject;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import com.facebook.FacebookSdk;
+import com.facebook.appevents.AppEventsLogger;
+
 
 public class LoginActivity extends Activity {
     //FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -75,7 +87,10 @@ public class LoginActivity extends Activity {
 
     Context context;
 
-
+    //private LoginButton btn_Facebook_Login;
+    Button btn_Facebook_Login;
+    private CallbackManager callbackManager;
+    private LoginCallback2 loginCallack;
 
     //아래 코드들은 네이버아이디로 로그인 API 를 사용하는데 필요한 값들이다.
     //client 정보
@@ -93,6 +108,22 @@ public class LoginActivity extends Activity {
         mAuth = FirebaseAuth.getInstance();
 
         context=this;
+
+        callbackManager = CallbackManager.Factory.create();
+        loginCallack = new LoginCallback2();
+
+        btn_Facebook_Login = (Button) findViewById(R.id.facebook_login);
+        //btn_Facebook_Login.setReadPermissions(Arrays.asList("public_profile", "email"));
+        //btn_Facebook_Login.registerCallback(callbackManager, loginCallack);
+        btn_Facebook_Login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                LoginManager loginManager = LoginManager.getInstance();
+                loginManager.logInWithReadPermissions(LoginActivity.this, Arrays.asList("public_profile", "email"));
+                loginManager.registerCallback(callbackManager, loginCallack);
+            }
+        });
+
 
         //만약 사용자가 로그인한 상태라면 다음 화면으로 자동으로 넘어간다.
         FirebaseUser currentUser = mAuth.getCurrentUser();
@@ -177,6 +208,9 @@ public class LoginActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         Log.v(TAG,"onActivityResult 호출");
+
+        callbackManager.onActivityResult(requestCode,resultCode,data);
+
         // 카카오톡|스토리 간편로그인 실행 결과를 받아서 SDK로 전달
         if (Session.getCurrentSession().handleActivityResult(requestCode, resultCode, data)) {
             super.onActivityResult(requestCode, resultCode, data);
@@ -458,5 +492,60 @@ public class LoginActivity extends Activity {
         public void onSessionOpenFailed(KakaoException e) {
             Toast.makeText(getApplicationContext(), "로그인 도중 오류가 발생했습니다. 인터넷 연결을 확인해주세요: "+e.toString(), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    // 페이스북 아이디로 로그인 기능을 작동하는데 필요한 클래스.
+    public class LoginCallback2 implements FacebookCallback<LoginResult>
+    {
+
+        @Override
+        public void onSuccess(LoginResult loginResult)
+        {
+            Log.e("Callback :: ", "onSuccess");
+            requestMe(loginResult.getAccessToken());
+        }
+
+        @Override
+        public void onCancel()
+        {
+            Log.e("Callback :: ", "onCancel");
+        }
+
+        @Override
+        public void onError(FacebookException error)
+        {
+            Log.e("Callback :: ", "onError : " + error.getMessage());
+        }
+
+        // 사용자 정보 요청
+        public void requestMe(AccessToken token)
+        {
+            GraphRequest graphRequest = GraphRequest.newMeRequest(token,
+                    new GraphRequest.GraphJSONObjectCallback()
+                    {
+                        @Override
+                        public void onCompleted(JSONObject object, GraphResponse response)
+                        {
+                            Log.e("result !!",object.toString());
+                            try {
+                                String name=object.getString("name");
+                                String email=object.getString("email");
+                                Log.v(TAG,"확인");
+                                Log.v(TAG,name);
+                                Log.v(TAG,email);
+                                CheckRegister(email,name);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                    });
+
+            Bundle parameters = new Bundle();
+            parameters.putString("fields", "id,name,email,gender,birthday");
+            graphRequest.setParameters(parameters);
+            graphRequest.executeAsync();
+        }
+
     }
 }

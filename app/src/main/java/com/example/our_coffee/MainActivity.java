@@ -11,9 +11,13 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -42,6 +46,8 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -168,6 +174,7 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
 
 
     }
+
 
 
 
@@ -730,6 +737,7 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
                             Log.v(TAG,"현재 아무런 팀에도 소속되어 있지 않다.");
                             bundle.putString("team_exist","no");
                             dialog.dismiss();
+                            UseMyMyTeamFragmentFunction().swipeRefreshLayout.setRefreshing(false);
                             bundle.putString("user_Email",currentUser.getEmail());
                             fragment_myteam.setArguments(bundle);
                             if(myteam_commit.equals("yes")){
@@ -839,6 +847,7 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
                             Log.v(TAG,"현재 아무런 팀에도 소속되어 있지 않다.");
                             bundle.putString("team_exist","no");
                             dialog.dismiss();
+                            UseMyMyTeamFragmentFunction().swipeRefreshLayout.setRefreshing(false);
                             bundle.putString("user_Email",currentUser.getEmail());
                             fragment_myteam.setArguments(bundle);
                             if(myteam_commit.equals("yes")){
