@@ -887,6 +887,7 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
                                         Log.v(TAG,"마지막 반복문 수행됨2");
                                         Log.v(TAG,myteam_commit);
                                         if(myteam_commit.equals("yes")){
+                                            Log.v(TAG,"myteam_commit 값은 yes");
                                             transaction = fragmentManager.beginTransaction();
                                             transaction.replace(R.id.frameLayout, fragment_myteam).commitAllowingStateLoss();
                                             myteam_commit="no";
@@ -898,6 +899,7 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
                                         bundle.putString("user_Email",currentUser.getEmail());
                                         fragment_myteam.setArguments(bundle);
                                         dialog.dismiss();
+
 
                                         UseMyMyTeamFragmentFunction().myteamArrayList.clear();
                                         UseMyMyTeamFragmentFunction().Load_existing_team();
@@ -1167,8 +1169,6 @@ public class MainActivity extends AppCompatActivity implements NotificationFragm
     public void InvitationAccepted() {
         Log.v(TAG,"InvitationAccepted");
 
-        //RefreshGetMyTeamFragent();
-        //GetAdditionalNotificationData();
 
         Download_dialog("잠시만 기다려주세요! :)");
         AcceptInvitation();

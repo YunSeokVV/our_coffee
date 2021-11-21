@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -99,6 +100,8 @@ public class Team_member extends AppCompatActivity {
     // 현재 화면에서 표현하고 있는 팀의 이름이다.
     String team_name;
 
+    SwipeRefreshLayout swipeRefreshLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -109,6 +112,7 @@ public class Team_member extends AppCompatActivity {
         my_team_member=findViewById(R.id.my_team_member);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         show_organized=(Button)findViewById(R.id.button);
+        swipeRefreshLayout=(SwipeRefreshLayout) findViewById(R.id.swipe_member_list);
 
         //사용자의 팀원 목록을 표현해주기 위한 리사이클러뷰다
         LinearLayoutManager mLinearLayoutManager = new LinearLayoutManager(getApplicationContext());
@@ -161,6 +165,21 @@ public class Team_member extends AppCompatActivity {
         });
 
 
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                team_member_email.clear();
+                team_member_coffee.clear();
+                member_coffee_option.clear();
+                member_nick_name.clear();
+                coffee_menu_list.clear();
+                coffee_number.clear();
+                team_memberArrayList.clear();
+                myTeamMemberAdapter.notifyDataSetChanged();
+                LoadUsersData();
+
+            }
+        });
 
     }       //onCreate end
 
@@ -267,10 +286,6 @@ public class Team_member extends AppCompatActivity {
                                                 last[0] =0;
                                             }
                                             last[0]++;
-
-
-
-
 
                                         }
 
@@ -388,7 +403,8 @@ public class Team_member extends AppCompatActivity {
             Log.v(TAG,"coffee_number "+coffee_number.get(i));
             Log.v(TAG,"coffee_menu_list "+coffee_menu_list.get(i));
         }
-
+        swipeRefreshLayout.setRefreshing(false);
+        myTeamMemberAdapter.notifyDataSetChanged();
     }
 
     // 화면에 필요한 정보들을 보여주기 위해서 DB에서 데이터를 받아올 때 까지 로딩중이라는 사실을 알려주는 다이얼로그 메소드다.

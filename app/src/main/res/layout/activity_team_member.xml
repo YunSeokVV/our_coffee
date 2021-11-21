@@ -18,20 +18,31 @@
         app:title="팀명을 입력하세요"
         />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/my_team_member"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_member_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:scrollbarFadeDuration="0"
-        android:scrollbarSize="10dp"
-        android:scrollbarThumbVertical="@android:color/darker_gray"
-        android:scrollbars="vertical"
-
         app:layout_constraintBottom_toTopOf="@+id/guideline3"
         app:layout_constraintEnd_toEndOf="parent"
-
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+        app:layout_constraintTop_toBottomOf="@+id/toolbar">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/my_team_member"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:scrollbarFadeDuration="0"
+            android:scrollbarSize="10dp"
+            android:scrollbarThumbVertical="@android:color/darker_gray"
+            android:scrollbars="vertical"
+
+            app:layout_constraintBottom_toTopOf="@+id/guideline3"
+            app:layout_constraintEnd_toEndOf="parent"
+
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <Button
         android:id="@+id/button"
