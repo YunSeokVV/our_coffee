@@ -1,57 +1,95 @@
-### 우리의 커피는?
+# <p align="center">   우리의 커피는? </p>
 
-# **프로젝트 개요**
+##### 
 
-우리의 커피는? 앱은 카페에서 단체로 음료주문을 해야할 때 유용한 앱입니다. 
-
-팀원들 각자가 마시고 싶은 음료를 설정하기만 하면 모두가 원하는 음료를 공유할 수 있기 때문에 따로 메모를 해야할 필요가 없습니다.
-
-단체 주문을 해야할 때 훨씬 편합니다.
-
-### 이 프로젝트는 개인 프로젝트입니다.
-
-# **기능**
-
-### 1.회원 가입
-이메일 형식으로 회원 가입을 진행합니다. 소셜네트워크로도 회원가입이 가능합니다. (카카오,네이버,페이스북)
-
-### 2.로그인
-
-### 3.나의 팀 목록 보기
-자신이 포함된 팀을 목록으로 볼 수 있습니다. 팀의 이름, 팀의 프로필 사진을 확인할 수 있습니다.
-
-### 4.새로운 팀 개설하기
-새로운 팀을 개설합니다. 팀명, 팀의 프로필 사진을 설정할 수 있습니다.
-
-### 5.팀원 초대하기
-자신이 속한 팀에 새로운 팀원을 초대할 수 있습니다. 
-
-검색한 사람이 존재하면 해당 사용자의 닉네임과 프로필 사진을 확인하고 만약 검색 결과가 존재하지 않는다면 존재하지 않는 사용자라고 알려줍니다.
-
-### 6. 팀원들의 음료 보기/음료 모아서 보기
-
-팀원들 각자가설정한 음료를 확인할 수 있습니다. 이를 통해서 카페에서 단체 주문을 편하게 할 수 있습니다.
-
-'음료 모아서 보기' 기능을 사용하면 사람들이 설정한 음료별로 총 개수만 보여주기 때문에 더욱 보기 편합니다.
-
-### 6.마이페이지
-
-자신의 닉네임, 프로필 사진, 자주 먹는 커피를 변경할 수 있습니다.
-
-### 7.초대 알림 보기
-
-다른 팀으로 부터 받은 초대목록을 볼 수 있습니다. 초대를 수락하게 되면 새로운 팀에 추가되고 초대를 거절하면 초대정보가 목록에서 사라집니다.
-
-# **사용 기술**
-
-### 1.FireBase Authentication
-사용자의 정보를 관리하기 위해서 이 기술을 사용하였습니다.
-
-### 2.FireBase FireStore
-고객에 대한 정보, 팀에 대한 정보 데이터를 저장하기 위해서 FireBase 에서 제공해주는 FireStore 데이터베이스를 사용했습니다.
-
-### 3.AndroidSDK
+<p align="center">   팀원들의 음료를 모아서 볼 수 있는 앱입니다. </p>
 
 
-# **시연 영상**
-https://youtu.be/3lwRgcAWAHY
+
+**목차**
+
+1. 앱의기능
+2. 사용한 기술들
+3. 시연영상 링크
+
+
+
+#  1. 앱의 기능
+
+
+
+
+![](https://private-user-images.githubusercontent.com/43668299/336711874-a306d377-f20a-425d-8549-f7512f31f372.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MTc1NjkzMzcsIm5iZiI6MTcxNzU2OTAzNywicGF0aCI6Ii80MzY2ODI5OS8zMzY3MTE4NzQtYTMwNmQzNzctZjIwYS00MjVkLTg1NDktZjc1MTJmMzFmMzcyLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNDA2MDUlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjQwNjA1VDA2MzAzN1omWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPThlM2Y4MTNlMTMyMDZiZWM4YjcwMDBjYTRmYjA0ZDY5YzE2YWE0N2RkY2YyNGE1YWFjN2U5MzhhOGU0MTAwNWEmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.LK8KDS5PHeg2DYtrX1fF96ZDWy9Sd4w-a9DwyF7CrpQ)
+
+
+
+![](https://private-user-images.githubusercontent.com/43668299/336711881-9a3d7576-1cbb-402d-bfcf-d2b7d98961ff.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MTc1NjkzMzcsIm5iZiI6MTcxNzU2OTAzNywicGF0aCI6Ii80MzY2ODI5OS8zMzY3MTE4ODEtOWEzZDc1NzYtMWNiYi00MDJkLWJmY2YtZDJiN2Q5ODk2MWZmLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNDA2MDUlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjQwNjA1VDA2MzAzN1omWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTgzZjMwMTM5MDAxNWY5YzlkZWZmZmI5M2NmYjBlMjcyZTQxMzc1MTYyNGNjNTMyNTUyOWI5ZmVmMDA0MWI4OWQmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.w9_Su5mSCsg4DteyINDTD631g8CKnM_N4UN0T28XqiE)
+
+
+
+![](https://private-user-images.githubusercontent.com/43668299/336711883-d34efcfb-66ab-44c1-afce-93306924371f.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MTc1NjkzMzcsIm5iZiI6MTcxNzU2OTAzNywicGF0aCI6Ii80MzY2ODI5OS8zMzY3MTE4ODMtZDM0ZWZjZmItNjZhYi00NGMxLWFmY2UtOTMzMDY5MjQzNzFmLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNDA2MDUlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjQwNjA1VDA2MzAzN1omWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTZlMzFjZjZkOGNkZDIxMWZjYjdiODViOTM1ODlhMDNiODk4YWU2OTM2NTAyYThkN2NlYWEwMThmMTgzNmVhNjYmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.SnliDRVngCc39pC0w6UA8APnE6qDs-mCnKJMD_lnSbE)
+
+
+
+# 기능 상세설명
+
+**1.회원가입 / 로그인**
+
+ 이메일 또는 소셜네트워크로 로그인합니다.
+
+**2.나의 팀 목록**
+
+ 현재 내가 소속된 팀 목록을 보여주는 화면입니다.
+
+ 새로고침해서 추가된 팀을 확인할 수 있습니다.
+
+**3.팀 생성**
+
+ 사용자가 새로운 팀을 생성합니다.
+
+ 팀의 프로필 사진과 팀명을 설정할 수 있습니다.
+
+**4.팀원초대**
+
+ 사용자가 새로운 팀원을 초대합니다.
+
+**5.초대알림**
+
+ 초대 알림을 확인하는 화면입니다. 
+
+ 초대를 수락, 거절할 수 있습니다.
+
+ 새로고침으로 새로운 초대를 확인 합니다.
+
+**6.나의 프로필**
+
+ 자신의 프로필을 표현하는 화면입니다.
+
+ 프로필 사진, 닉네임, 자주 먹는 커피를 변경할 수 있습니다.
+
+**7.팀원 음료 확인**
+
+ 팀원목록을 보는 화면입니다.
+
+ 팀원들이 마시고 싶어하는 음료를 확인할 수 있습니다.
+
+**8.팀원 음료 모아보기**
+
+ 팀원들의 음료를 모아서 확인할 수 있습니다.
+
+
+
+# 2. 사용한 기술 & 라이브러리
+
+- Language : Java
+- Glide
+- Firebase Firestore
+- Firebase Storage
+- Firebase Authentication
+
+
+
+
+# 3. 시연영상 링크
+
+https://www.youtube.com/watch?v=3lwRgcAWAHY
